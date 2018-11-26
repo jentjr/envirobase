@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS site (
-	site_id ,
-	site_location GEOGRAPHY(POINT, 4326),
+	site_id SERIAL PRIMARY KEY,
+	site_geog GEOGRAPHY(POINT, 4326),
 	site_name VARCHAR NULL,
 	address VARCHAR NULL,
 	zipcode VARCHAR NULL,
@@ -8,40 +8,39 @@ CREATE TABLE IF NOT EXISTS site (
 );
 
 CREATE TABLE IF NOT EXISTS unit (
-	unit_id PRIMARY KEY,
-	program_id,
-	site_id,
-	unit_location GEOGRAPHY(POLYGON, 4326)
+	unit_id SERIAL PRIMARY KEY,
+	unit_geog GEOGRAPHY(POLYGON, 4326),
+	site_id INTEGER REFERENCES site(site_id)
 );
 
-CREATE TABLE IF NOT EXISTS well (
-	well_id PRIMARY KEY,
-	well_location GEOGRAPHY(POINT, 4326),
-	site_id ,
-	unit_id
+CREATE TABLE IF NOT EXISTS location (
+	location_id VARCHAR PRIMARY KEY,
+	location_geog GEOGRAPHY(POINT, 4326),
+	site_id INTEGER REFERENCES site(site_id),
+	unit_id INTEGER REFERENCES unit(unit_id)
 );	
 
 CREATE TABLE IF NOT EXISTS parameters (
 	param_id PRIMARY KEY,
-	description,
-	epa_equivalence,
-	characteristic_name,
-	measurement_code,
-	sample_frac,
-	stat_basis,
-	time_basis,
-	size_basis,
-	CONSTRAINT param_id_check CHECK (param_id SIMILAR TO '[[:digit:]]{5}')
+	CONSTRAINT param_id_check CHECK (param_id SIMILAR TO '[[:digit:]]{5}'),
+	description VARCHAR,
+	epa_equivalence BOOL,
+	characteristic_name VARCHAR,
+	measurement_code VARCHAR,
+	sample_frac VARCHAR,
+	stat_basis VARCHAR,
+	time_basis VARCHAR,
+	size_basis VARCHAR	
 );
 
-CREATE TABLE IF NOT EXISTS lab_analysis (
+CREATE TABLE IF NOT EXISTS sample_resulst (
         lab_id VARCHAR,
-        sample_id VARCHAR NOT NULL,
-        sample_date DATE,
+        location_id VARCHAR NOT NULL REFERENCES location(location_id),
+	param_id VARCHAR(5) NOT NULL REFERENCES parameters(param_id),
+        sample_date DATE NOT NULL,
 	media_matrix VARCHAR,
 	prep_method VARCHAR,
 	analysis_method VARCHAR,
-        param_id VARCHAR(5) NOT NULL,
 	analysis_flag CHAR(1),
         analysis_result REAL NULL,
         analysis_unit VARCHAR NOT NULL,
@@ -53,6 +52,5 @@ CREATE TABLE IF NOT EXISTS lab_analysis (
 	disclaimer VARCHAR,
 	analysis_date DATE NULL,
 	order_commment VARCHAR,
-        analysis_comment VARCHAR,
-	CONSTRAINT analysis_param_id_check CHECK (param_id SIMILAR TO '[[:digit:]]{5}')
+        analysis_comment VARCHAR
 );
