@@ -21,22 +21,24 @@ CREATE TABLE IF NOT EXISTS location (
 );	
 
 CREATE TABLE IF NOT EXISTS parameters (
-	param_id PRIMARY KEY,
-	CONSTRAINT param_id_check CHECK (param_id SIMILAR TO '[[:digit:]]{5}'),
+	param_cd CHAR(5) PRIMARY KEY,
+	CONSTRAINT param_cd_check CHECK (param_cd SIMILAR TO '[[:digit:]]{5}'),
 	description VARCHAR,
-	epa_equivalence BOOL,
-	characteristic_name VARCHAR,
-	measurement_code VARCHAR,
-	sample_frac VARCHAR,
-	stat_basis VARCHAR,
-	time_basis VARCHAR,
-	size_basis VARCHAR	
+	epa_equivalence VARCHAR,
+	characteristicname VARCHAR,
+	measureunitcode VARCHAR,
+	resultsamplefraction VARCHAR,
+	resulttemperaturebasis VARCHAR,
+	resultstatisticalbasis VARCHAR,
+	resulttimebasis VARCHAR,
+	resultweightbasis VARCHAR,
+	resultparticlesizebasis VARCHAR
 );
 
-CREATE TABLE IF NOT EXISTS sample_resulst (
+CREATE TABLE IF NOT EXISTS sample_results (
         lab_id VARCHAR,
         location_id VARCHAR NOT NULL REFERENCES location(location_id),
-	param_id VARCHAR(5) NOT NULL REFERENCES parameters(param_id),
+	param_cd VARCHAR(5) NOT NULL REFERENCES parameters(param_cd),
         sample_date DATE NOT NULL,
 	media_matrix VARCHAR,
 	prep_method VARCHAR,
@@ -54,3 +56,5 @@ CREATE TABLE IF NOT EXISTS sample_resulst (
 	order_commment VARCHAR,
         analysis_comment VARCHAR
 );
+
+COPY param_codes FROM 'param_codes.csv' WITH (FORMAT csv);
