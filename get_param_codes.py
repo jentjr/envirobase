@@ -2,8 +2,9 @@ import numpy as np
 import pandas as pd
 
 def get_param_codes():
-    url = "https://qwwebservices.usgs.gov/public_srsnames.xls"
-    df = pd.read_excel(url, skiprows=6, dtype={0:np.dtype('U5')})
+    url = "https://help.waterdata.usgs.gov/parameter_cd?group_cd=%"
+    df = pd.read_html(url, header=0, converters={0: str})[0] 
+    df["Parameter Code"] = df.astype(np.dtype('U5'))
     return df
 
 if __name__ == '__main__':
