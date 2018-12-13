@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS site (
 
 CREATE TABLE IF NOT EXISTS unit (
     unit_id SERIAL PRIMARY KEY,
-    site_name VARCHAR REFERENCES site(site_name),
+    site_id INT REFERENCES site(site_id),
     unit_name VARCHAR NOT NULL,
     unit_geog GEOGRAPHY(POLYGON, 4326) NULL,
     constraint unit_name_uniq unique (unit_name)
@@ -19,13 +19,13 @@ CREATE TABLE IF NOT EXISTS unit (
 
 CREATE TABLE IF NOT EXISTS sample_location (
     location_id VARCHAR PRIMARY KEY,
-    site_name VARCHAR REFERENCES site(site_name) ON DELETE RESTRICT ON UPDATE CASCADE,
+    site_id INT REFERENCES site(site_id) ON DELETE CASCADE ON UPDATE CASCADE,
     location_type VARCHAR NULL,
     location_geog GEOGRAPHY(POINT, 4326),
-    UNIQUE(location_id, site_name)
+    UNIQUE(location_id, site_id)
 );	
 
-CREATE TABLE IF NOT EXISTS sample_parameters (
+CREATE TABLE IF NOT EXISTS sample_parameter (
     param_cd CHAR(5) PRIMARY KEY,
     CONSTRAINT param_cd_check CHECK (param_cd SIMILAR TO '[[:digit:]]{5}'),
     group_name VARCHAR,
@@ -42,12 +42,12 @@ CREATE TABLE IF NOT EXISTS sample_parameters (
     parameter_unit VARCHAR
 );
 
-CREATE TABLE IF NOT EXISTS sample_results (
-    sample_result_id SERIAL PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS sample_result (
+    id SERIAL PRIMARY KEY,
+    sample_site_id INT NOT NULL REFERENCES site(site_id),
     lab_id VARCHAR,
-    site_name VARCHAR REFERENCES site(site_name),
-    location_id VARCHAR NOT NULL REFERENCES sample_location(location_id) ON DELETE RESTRICT ON UPDATE CASCADE,
-    param_cd VARCHAR(5) NOT NULL REFERENCES sample_parameters(param_cd),
+    location_id VARCHAR NOT NULL REFERENCES sample_location(location_id),
+    param_cd VARCHAR(5) NOT NULL REFERENCES sample_parameter(param_cd),
     sample_date DATE NOT NULL,
     media_matrix VARCHAR NULL,
     prep_method VARCHAR NULL,
@@ -65,19 +65,24 @@ CREATE TABLE IF NOT EXISTS sample_results (
     UNIQUE(lab_id, location_id, sample_date, param_cd, analysis_result)
 );
 
-\copy sample_parameters FROM 'param_codes.csv' WITH (FORMAT csv);
+-- load in the USGS parameter codes
+\copy sample_parameter FROM 'param_codes.csv' WITH (FORMAT csv);
 
-CREATE OR REPLACE FUNCTION check_units() 
+
+-- Create trigger to make sure the inserted sample results unit matches
+-- the USGS parameter code unit. This is a quick check instead of 
+-- trying to do unit conversions.
+CREATE OR REPLACE FUNCTION check_unit() 
   RETURNS trigger AS
-$check_units$
+$check_unit$
 DECLARE found_unit BIGINT;
 DECLARE tmp_unit VARCHAR;
 BEGIN
-  SELECT COUNT(*) INTO found_unit FROM sample_parameters
-    WHERE sample_parameters.param_cd = NEW.param_cd;
+  SELECT COUNT(*) INTO found_unit FROM sample_parameter
+    WHERE sample_parameter.param_cd = NEW.param_cd;
   IF found_unit > 0 THEN
-    SELECT parameter_unit INTO tmp_unit FROM sample_parameters
-      WHERE sample_parameters.param_cd = NEW.param_cd;	
+    SELECT parameter_unit INTO tmp_unit FROM sample_parameter
+      WHERE sample_parameter.param_cd = NEW.param_cd;	
           -- check that analysis_unit equals parameter_unit
 	  IF NEW.analysis_unit != tmp_unit THEN
 	    RAISE EXCEPTION 'Units not equal. Convert prior to inserting.';
@@ -85,11 +90,11 @@ BEGIN
   END IF;
 RETURN NEW;  
 END;
-$check_units$ 
+$check_unit$ 
 LANGUAGE plpgsql;
 
-CREATE TRIGGER check_insert_units
+CREATE TRIGGER check_insert_unit
   BEFORE INSERT 
-  ON sample_results
+  ON sample_result
   FOR EACH ROW 
-  EXECUTE PROCEDURE check_units();
+  EXECUTE PROCEDURE check_unit();
