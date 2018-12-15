@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS sample_result (
 );
 
 -- load in the USGS parameter codes
-\copy sample_parameter FROM 'param_codes.csv' WITH (FORMAT csv);
+\copy sample_parameter FROM 'data/param_codes.csv' WITH (FORMAT csv);
 
 
 -- Create trigger to make sure the inserted sample results unit matches

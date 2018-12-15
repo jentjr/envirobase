@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block navbar %}
-<div class="navbar navbar-inverse" role="navigation">
+<div class="navbar" role="navigation">
     <div class="container">
         <div class="navbar-header">
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -22,8 +22,11 @@
         </div>
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-                <li><a href="/">Home</a></li>
+		    <li><a href={{ url_for('site') }}>Sites</a></li>
             </ul>
+            <ul class="nav navbar-nav">
+			<li><a href={{ url_for('parameter') }}>Parameters</a></li>
+		</ul>
         </div>
     </div>
 </div>
@@ -33,9 +36,4 @@
 <div class="container">
     {% block page_content %}{% endblock %}
 </div>
-{% endblock %}
-
-{% block scripts %}
-{{ super() }}
-{{ moment.include_moment() }}
 {% endblock %}

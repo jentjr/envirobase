@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Envirobase - Sites{% endblock %}
+
+{% block page_content %}
+<table class="table">
+	<thead class="thead-dark">
+		<tr>
+			<th scope="col">Name</th>
+			<th scope="col">Address</th>
+			<th scope="col">City</th>
+			<th scope="col">State</th>
+			<th scope="col">Zipcode</th>
+		</tr>
+	</thead>
+	<tbody>
+    {% for site in sites %}
+	<tr>
+		<td>{{site[0]}}</td>
+		<td>{{site[1]}}</td>
+		<td>{{site[2]}}</td>
+		<td>{{site[3]}}</td>
+		<td>{{site[4]}}</td>
+	</tr>
+	{% endfor %}
+	</tbody>
+</table>
+{% endblock %}

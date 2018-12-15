@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Envirobase - Parameters{% endblock %}
+
+{% block page_content %}
+<table class="table">
+	<thead class="thead-dark">
+		<tr>
+			<th scope="col">Param Code</th>
+			<th scope="col">Group Name</th>
+			<th scope="col">SRS Name</th>
+			<th scope="col">Description</th>
+			<th scope="col">Unit</th>
+		</tr>
+	</thead>
+    <tbody>
+    {% for parameter in parameters %}
+	<tr>
+		<td>{{parameter[0]}}</td>
+		<td>{{parameter[1]}}</td>
+		<td>{{parameter[2]}}</td>
+		<td>{{parameter[3]}}</td>
+		<td>{{parameter[4]}}</td>
+	</tr>
+	{% endfor %}
+	</tbody>
+</table>
+{% endblock %}
