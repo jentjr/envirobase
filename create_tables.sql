@@ -65,6 +65,35 @@ CREATE TABLE IF NOT EXISTS sample_result (
     UNIQUE(lab_id, location_id, sample_date, param_cd, analysis_result)
 );
 
+
+CREATE TABLE IF NOT EXISTS boring (
+    boring_id INTEGER PRIMARY KEY,
+    start_date DATE,
+    end_date DATE
+);
+
+CREATE TABLE IF NOT EXISTS well (
+    well_id VARCHAR NOT NULL REFERENCES sample_location(location_id),
+    boring_id INTEGER REFERENCES boring(boring_id),
+    install_date DATE,
+    top_riser REAL,
+    top_bent_seal REAL,
+    top_gravel_pack REAL,
+    top_screen REAL,
+    bottom_screen REAL,
+    bottom_well REAL,
+    bottom_gravel_pack REAL,
+    bottom_boring REAL,
+    grout_seal_desc VARCHAR,
+    bent_seal_desc VARCHAR,
+    screen_type VARCHAR,
+    gravel_pack_desc VARCHAR,
+    riser_pipe_desc VARCHAR,
+    spacer_depths VARCHAR,
+    notes VARCHAR
+);
+
+
 -- load in the USGS parameter codes
 \copy sample_parameter FROM 'data/param_codes.csv' WITH (FORMAT csv);
 
