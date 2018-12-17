@@ -11,16 +11,18 @@
 			<th scope="col">City</th>
 			<th scope="col">State</th>
 			<th scope="col">Zipcode</th>
+			<th scope="col">Longitude, Latitude</th>
 		</tr>
 	</thead>
 	<tbody>
-    {% for site in sites %}
+    {% for site in sites['features'] %}
 	<tr>
-		<td>{{site[0]}}</td>
-		<td>{{site[1]}}</td>
-		<td>{{site[2]}}</td>
-		<td>{{site[3]}}</td>
-		<td>{{site[4]}}</td>
+		<td>{{ site['properties']['site_name'] }}</td>
+		<td>{{ site['properties']['address'] }}</td>
+		<td>{{ site['properties']['city'] }}</td>
+		<td>{{ site['properties']['state'] }}</td>
+		<td>{{ site['properties']['zipcode'] }}</td>
+		<td>{{ site['geometry']['coordinates'] }}</td>
 	</tr>
 	{% endfor %}
 	</tbody>
