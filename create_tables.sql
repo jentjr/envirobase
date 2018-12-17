@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS sample_parameter (
 
 CREATE TABLE IF NOT EXISTS sample_result (
     id SERIAL PRIMARY KEY,
-    sample_site_id INT NOT NULL REFERENCES site(site_id),
+    site_id INT NOT NULL REFERENCES site(site_id),
     lab_id VARCHAR,
     location_id VARCHAR NOT NULL REFERENCES sample_location(location_id),
     param_cd VARCHAR(5) NOT NULL REFERENCES sample_parameter(param_cd),
