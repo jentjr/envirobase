@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Envirobase - Sample Locations{% endblock %}
+
+{% block page_content %}
+<table class="table">
+	<thead class="thead-dark">
+		<tr>
+			<th scope="col">Sample Location</th>
+			<th scope="col">Location Type</th>
+			<th scope="col">Longitude, Latitude</th>
+		</tr>
+	</thead>
+	<tbody>
+    {% for location in sample_locations['features'] %}
+	<tr>
+		<td>{{ location['properties']['location_id'] }}</td>
+		<td>{{ location['properties']['location_type'] }}</td>
+		<td>{{ location['geometry']['coordinates'] }}</td>
+	</tr>
+	{% endfor %}
+	</tbody>
+</table>
+{% endblock %}
