@@ -1,0 +1,74 @@
+WS,Surface water,"Water on the surface of the Earth stored or transported in rivers, streams, estuaries, lakes, ponds, swamps, glaciers, or other aquatic areas. It also may refer to water in urban drains and storm-sewer systems.",9
+WG,Groundwater,Water below the surface of the Earth contained in the saturated zone. It does not include soil moisture or interstitial water.,6
+WW,Wet deposition,"Water reaching the Earth's surface through precipitation as rain, snow, sleet, hail, or condensation of fog and dew. The water may contain undissolved particulate and gaseous materials acquired from the atmosphere during precipitation.",7
+WI,Interstitial water,"Water occuring in the small openings, spaces, pores, and voids between particles of unconsolidated materials. Includes water found in the interstices of shallow sediments of a lake, wetland, reservoir, or stream, and in the vadose zone between the root zone and the water table. The water is held in place by entrapment, ionic attraction, and capillary or adhesive forces, rather than from pressure components of saturation.",F
+WA,Air moisture,"Water present in air in a gaseous form. Air moisture plays a significant role in weather when it changes from one state to another. These changes include condensation (cloud, fog, dew, and frost) and precipitation (rainfall and snowfall).",
+WM,Soil moisture,"Water occupying voids between loose soil particles within the aerated root zone. The water is held in place by surface tension, capillary and hydroscopic forces in opposition to the pull of gravitational forces.",K
+WL,Leachate,"A solution obtained by passing a liquid (usually aqueous) through an unconsolidated solid medium, thereby dissolving materials (from the solid medium) which become a part of the solution. It also contains those precipitates that are the result of the solution process and subsequent chemical or biological reactions.",2
+WF,Landfill effluent,A liquid material (usually water) that is drained or pumped from a landfill. It usually is a liquid that has percolated through solid landfill material to become a transport medium for materials dissolved from the landfill.,4
+WU,Elutriation,A process by which a mixture of an unconsolidated solid medium (usually soil) and a liquid medium (usually water) has been agitated for a given period of time to dissolve materials from the solid. The solid/liquid mixture is finally separated and the resulting solution is analyzed for materials dissolved during the elutriation process.,5
+WE,Effluent,"Treated or untreated wastewater after use at a facility or wastewater treatment plant, or from combined sources, such as combined-sewer overflows or tile drainage systems.",%
+WD,Produced water,Water that is a byproduct of oil and gas development. Produced water is associated with the oil and gas reservoir and may include formation waters and (or) injected fluids and solids introduced during resource development.,
+WT,Treated water supply,Water after being processed for some particular use(s),$
+WB,Untreated water supply,Untreated water supply from a blend of surface and ground waters or from unknown sources.,
+WH,Hyporheic zone,"Near-stream subsurface environment where mixing occurs between subsurface water and surface water. Water flows not only in the open stream channel, but also through the interstices of stream-channel and bank sediments, thus creating a mixing zone with subsurface water. There is not a precise separation between groundwater and surface water, thus the hyporheic zone is not precisely defined.",~
+WC,Canopy water,Water dripping off tree-leaf canopies or running down the trunks of trees.,\
+WP,Plant Water,Water that is extracted from plant tissue and subsequently analyzed for its chemical properties. This includes both intra- and extracellular water in the plant tissue.,
+SS,Suspended sediment,Sediment carried in suspension by the turbulent components of the fluid or by Brownian motion.,1
+SB,Bottom material,A mixture of mineral and organic matter that compose the top bed deposits (usually the first few inches) underlying a body of water.,H
+ST,Solids,"Unconsolidated materials that may be soils, cores, borehole cuttings, sediments, matter suspended in water or wastewater, street sweepings, other particulate matter, or the total array of materials that are collected as part of a ""clean sweep""",B
+SC,Core material,Consolidated or unconsolidated material removed from a pipe or casing during a drilling (coring) operation.,E
+SU,Borehole cuttings,Unconsolidated material removed from a pipe or casing during a drilling (coring) operation,
+SO,Soil,"A wet or dry substance composed of unconsolidated fine grain rock fragments (minerals) and organic material that has been modified sufficiently by physical, chemical, or biological processes to support terrestrial plant growth.",G
+SL,Sludge,"An unconsolidated material, from an anthropogenic source, covering the ground or the bed of a water body, usually originating as a result of processes such as domestic or industrial waste treatment.",J
+SF,Fecal material,"An unconsolidated material made up of warm-blooded animal or human wastes covering the ground, streambed, or suspended in a water body. Includes wastes from animal husbandry operations transferred to storage lagoons, or a slurry runoff. Fecal solids have generally not been processed and are sampled in their natural state.",
+SD,Dry deposition,"Solid, aerosol or gaseous materials deposited from the atmosphere during dry weather periods.",3
+BA,Animal tissue,"Any type of tissue that comprises either whole or parts of insects, fish, or other organisms living in an aquatic environment, or animals that may or may not have been collected from a water body.",C
+BP,Plant tissue,"Any type of non-animal tissue that comprises either whole or parts of plants, aquatic or non-aquatic.",D
+BH,Phytoplankton (quantitative),Phytoplanktonic species composition and enumeration (quantitative).,L
+BY,Phytoplankton (qualitative),Phytoplanktonic species composition (qualitative).,M
+BE,Periphyton (qualitative),Periphyton species composition (qualitative).,N
+BI,Benthic invertebrates (quan),Benthic invertebrates species composition and enumeration (quantitative).,O
+BD,Periphyton (quantitative),Periphyton species composition and enumeration (quantitative).,P
+AA,Air,Sample of atmospheric gases.,*
+AS,Soil gas,"Gases occurring in the small openings, spaces, and voids between articles of unconsolidated materials in that portion of the vadose water zone between the root zone and the water table.",&
+OA,Artificial,Any substance that is not part of an aquatic environment and cannot be described by the Sample Medium Codes,A
+ON,Not determined,Not determined,0
+OB,Bulk deposition,A mixture of undesignated proportions of wet and dry deposition sampled by a continuously open container.,8
+WSQ,QC sample - Surface water,"QC sample - Water on the surface of the Earth stored or transported in rivers, streams, estuaries, lakes, ponds, swamps, glaciers, or other aquatic areas. It also may refer to water in urban drains and storm-sewer systems.",R
+WGQ,QC sample - Groundwater,QC sample - Water below the surface of the Earth contained in the saturated zone. It does not include soil moisture or interstitial water.,S
+WWQ,QC sample - Wet deposition,"QC sample - Water reaching the Earth's surface through precipitation as rain, snow, sleet, hail, or condensation of fog and dew. The water may contain undissolved particulate and gaseous materials acquired from the atmosphere during precipitation.",T
+WIQ,QC sample - Interstitial water,"QC sample - Water occurring in the small openings, spaces, and voids between particles of unconsolidated materials in that portion of the vadose water zone between the root zone and the water table. The water is held in place by entrapment, ionic attraction, and capillary or adhesive forces, rather than from upward pressure components of saturation.",Z
+WAQ,QC sample - Air moisture,"QC sample - Water present in air in a gaseous form. Air moisture plays a significant role in weather when it changes from one state to another. These changes include condensation (cloud, fog, dew, and frost) and precipitation (rainfall and snowfall).",
+WMQ,QC sample - Soil moisture,"QC sample - Water occupying voids between loose soil particles within the aerated root zone. The water is held in place by surface tension, capillary and hydroscopic forces in opposition to the pull of gravitational forces.",
+WLQ,QC sample - Leachate,"QC sample -A solution obtained by passing a liquid (usually aqueous) through an unconsolidated solid medium, thereby dissolving materials (from the solid medium) which become a part of the solution. It also contains those precipitates that are the result of the solution process and subsequent chemical or biological reactions.",=
+WFQ,QC sample - Landfill effluent,QC sample -A liquid material (usually water) that is drained or pumped from a landfill. It usually is a liquid that has percolated through solid landfill material to become a transport medium for materials dissolved from the landfill.,
+WUQ,QC sample - Elutriation,QC sample - A process by which a mixture of an unconsolidated solid medium (usually soil) and a liquid medium (usually water) has been agitated for a given period of time to dissolve materials from the solid. The solid/liquid mixture is finally separated and the resulting solution is analyzed for materials dissolved during the elutriation process.,
+WEQ,QC sample - Effluent,"QC sample - Treated or untreated wastewater after use at a facility or wastewater treatment plant, or from combined sources, such as combined-sewer overflows or tile drainage systems.",}
+WDQ,QC sample - Produced water,QC sample - Water that is a byproduct of oil and gas development. Produced water is associated with the oil and gas reservoir and may include formation waters and (or) injected fluids and solids introduced during resource development.,
+WTQ,QC sample - Treated water supply,QC sample -Water after being processed for some particular use(s),{
+WBQ,QC samp - Untreated water supply,QC sample - Untreated water supply from a blend of surface and ground waters or from unknown sources.,
+WHQ,QC sample - Hyporheic zone,"QC sample - Near-stream subsurface environment where mixing occurs between subsurface water and surface water. Water flows not only in the open stream channel, but also through the interstices of stream-channel and bank sediments, thus creating a mixing zone with subsurface water. There is not a precise separation between groundwater and surface water, thus the hyporheic zone is not precisely defined.",>
+WCQ,QC sample - Canopy water,QC sample - Water dripping off tree-leaf canopies or running down the trunks of trees.,
+WPQ,QC sample - Plant Water,QC sample - Water that is extracted from plant tissue and subsequently analyzed for its chemical properties. This includes both intra- and extracellular water in the plant tissue.,
+SSQ,QC sample - Suspended sediment,QC sample - Sediment carried in suspension by the turbulent components of the fluid or by Brownian motion.,V
+SBQ,QC sample - Bottom material,QC sample - A mixture of mineral and organic matter that compose the top bed deposits (usually the first few inches) underlying a body of water.,W
+STQ,QC sample - Solids,"QC sample - Unconsolidated materials that may be soils, cores, borehole cuttings, sediments, matter suspended in water or wastewater, street sweepings, other particulate matter, or the total array of materials that are collected as part of a ""clean sweep""",
+SCQ,QC sample - Core material,QC sample - Consolidated or unconsolidated material removed from a pipe or casing during a drilling (coring) operation.,@
+SUQ,QC sample - Borehole cuttings,QC sample - Unconsolidated material removed from a pipe or casing during a drilling (coring) operation,
+SOQ,QC sample - Soil,"QC sample - A wet or dry substance composed of unconsolidated fine grain rock fragments (minerals) and organic material that has been modified sufficiently by physical, chemical, or biological processes to support terrestrial plant growth.",<
+SLQ,QC sample - Sludge,"QC sample - An unconsolidated material, from an anthropogenic source, covering the ground or the bed of a water body, usually originating as a result of processes such as domestic or industrial waste treatment.",(
+SFQ,QC sample - Fecal material,"QC sample - An unconsolidated material made up of warm-blooded animal or human wastes covering the ground, streambed, or suspended in a water body. Includes wastes from animal husbandry operations transferred to storage lagoons, or a slurry runoff. Fecal solids have generally not been processed and are sampled in their natural state.",
+SDQ,QC sample - Dry deposition,"QC sample - Solid, aerosol or gaseous materials deposited from the atmosphere during dry weather periods.",
+BAQ,QC sample - Animal tissue,"QC sample - Any type of tissue that comprises either whole or parts of insects, fish, or other organisms living in an aquatic environment, or animals that may or may not have been collected from a water body.",X
+BPQ,QC sample - Plant tissue,"QC sample - Any type of non-animal tissue that comprises either whole or parts of plants, aquatic or non-aquatic.",Y
+BHQ,QC sample - Phytoplankton (quan),QC sample - Phytoplanktonic species composition and enumeration (quantitative).,
+BYQ,QC sample - Phytoplankton (qual),QC sample -Phytoplanktonic species composition (qualitative).,
+BEQ,QC sample - Periphyton (qual),QC sample - Periphyton species composition (qualitative).,
+BIQ,QC samp - Benthic invert (quan),QC sample -Benthic invertebrates species composition and enumeration (quantitative).,
+BDQ,QC sample - Periphyton (quan),QC sample - Periphyton species composition and enumeration (quantitative).,
+AAQ,QC sample - Air,QC sample - Sample of atmospheric gases.,[
+ASQ,QC sample - Soil gas,"QC sample - Gases occurring in the small openings, spaces, and voids between articles of unconsolidated materials in that portion of the vadose water zone between the root zone and the water table.",]
+OAQ,QC sample - Artificial,QC sample - Any substance that is not part of an aquatic environment and cannot be described by the Sample Medium Codes.,Q
+ONQ,QC sample - Not determined,QC sample - Not determined,
+OBQ,QC sample - Bulk deposition,QC sample - A mixture of undesignated proportions of wet and dry deposition sampled by a continuously open container.,U

@@ -1,0 +1,1 @@
+DROP TRIGGER IF EXISTS check_insert_units ON sample_result;

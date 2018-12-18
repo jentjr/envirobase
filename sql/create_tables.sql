@@ -42,6 +42,13 @@ CREATE TABLE IF NOT EXISTS sample_parameter (
     parameter_unit VARCHAR
 );
 
+CREATE TABLE IF NOT EXISTS medium_code (
+    medium_cd VARCHAR(3) PRIMARY KEY,
+	medium_name VARCHAR(64),
+	medium_description VARCHAR,
+	legacy_cd CHAR(1)
+);
+
 CREATE TABLE IF NOT EXISTS sample_result (
     id SERIAL PRIMARY KEY,
     site_id INT NOT NULL REFERENCES site(site_id),
@@ -49,22 +56,22 @@ CREATE TABLE IF NOT EXISTS sample_result (
     location_id VARCHAR NOT NULL REFERENCES sample_location(location_id),
     param_cd VARCHAR(5) NOT NULL REFERENCES sample_parameter(param_cd),
     sample_date DATE NOT NULL,
-    media_matrix VARCHAR NULL,
+	sample_time TIME NULL,
+    medium_cd VARCHAR(3) REFERENCES medium_code(medium_cd),
     prep_method VARCHAR NULL,
     analysis_method VARCHAR NULL,
-    analysis_flag CHAR(1),
+    analysis_flag CHAR(1) NULL,
     analysis_result REAL NULL,
     analysis_unit VARCHAR NOT NULL,
-    detection_limit REAL,
-    prac_quant_limit REAL,
-    analysis_qualifier CHAR(1),
+    detection_limit REAL NULL,
+    reporting_limit REAL NULL,
+    analysis_qualifier CHAR(1) NULL,
     disclaimer VARCHAR NULL,
-    analysis_date DATE NULL,
-    order_commment VARCHAR,
-    analysis_comment VARCHAR,
+    analysis_date TIMESTAMP NULL,
+    order_comment VARCHAR NULL,
+    analysis_comment VARCHAR NULL,
     UNIQUE(lab_id, location_id, sample_date, param_cd, analysis_result)
 );
-
 
 CREATE TABLE IF NOT EXISTS boring (
     boring_id INTEGER PRIMARY KEY,
@@ -92,38 +99,7 @@ CREATE TABLE IF NOT EXISTS well (
     spacer_depths VARCHAR,
     notes VARCHAR
 );
-
-
--- load in the USGS parameter codes
+ 
+-- load in the USGS parameter and medium codes
 \copy sample_parameter FROM 'data/param_codes.csv' WITH (FORMAT csv);
-
-
--- Create trigger to make sure the inserted sample results unit matches
--- the USGS parameter code unit. This is a quick check instead of 
--- trying to do unit conversions.
-CREATE OR REPLACE FUNCTION check_unit() 
-  RETURNS trigger AS
-$check_unit$
-DECLARE found_unit BIGINT;
-DECLARE tmp_unit VARCHAR;
-BEGIN
-  SELECT COUNT(*) INTO found_unit FROM sample_parameter
-    WHERE sample_parameter.param_cd = NEW.param_cd;
-  IF found_unit > 0 THEN
-    SELECT parameter_unit INTO tmp_unit FROM sample_parameter
-      WHERE sample_parameter.param_cd = NEW.param_cd;	
-          -- check that analysis_unit equals parameter_unit
-	  IF NEW.analysis_unit != tmp_unit THEN
-	    RAISE EXCEPTION 'Units not equal. Convert prior to inserting.';
-	  END IF;
-  END IF;
-RETURN NEW;  
-END;
-$check_unit$ 
-LANGUAGE plpgsql;
-
-CREATE TRIGGER check_insert_unit
-  BEFORE INSERT 
-  ON sample_result
-  FOR EACH ROW 
-  EXECUTE PROCEDURE check_unit();
+\copy medium_code FROM 'data/medium_codes.csv' WITH (FORMAT csv); 
