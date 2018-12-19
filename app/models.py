@@ -1,6 +1,8 @@
+import json
 from . import db
+from geoalchemy2 import functions
 from geoalchemy2.types import Geography
-
+from flask import current_app, request, url_for
 
 class Boring(db.Model):
     __tablename__ = "boring"
@@ -56,6 +58,19 @@ class Site(db.Model):
     state = db.Column(db.CHAR(2))
     zipcode = db.Column(db.String)
     site_geog = db.Column(Geography("POINT", 4326))
+    
+    coords = db.column_property(functions.ST_AsGeoJSON(site_geog))
+
+    def to_json(self):
+        json_site = {
+                'url': url_for('api.get_site', site_id=self.site_id),
+                'site_name': self.site_name,
+                'address': self.address,
+                'city': self.city,
+                'state': self.state,
+                'geometry': json.loads(self.coords)
+        }
+        return json_site
 
 
 class SampleLocation(db.Model):
