@@ -6,17 +6,17 @@
 <table class="table">
 	<thead class="thead-dark">
 		<tr>
+            <th scope="col">Site</th>
 			<th scope="col">Sample Location</th>
 			<th scope="col">Location Type</th>
-			<th scope="col">Longitude, Latitude</th>
 		</tr>
 	</thead>
 	<tbody>
     {% for location in sample_locations %}
 	<tr>
+        <td>{{ location.site.site_name }}</td>
 		<td>{{ location.location_id }}</td>
 		<td>{{ location.location_type }}</td>
-		<td>{{ location.location_geom }}</td>
 	</tr>
 	{% endfor %}
 	</tbody>

@@ -38,24 +38,5 @@ def parameters():
 
 @main.route("/sample_results")
 def sample_results():
-    """
-	SELECT site.site_name, sample_location.location_id, sample_result.sample_date, 
-	  sample_result.analysis_flag, sample_result.analysis_result, 
-	  sample_result.analysis_unit, sample_result.detection_limit, 
-	  sample_result.reporting_limit, sample_result.analysis_qualifier,
-	  sample_parameter.description
-	FROM site 
-	  INNER JOIN sample_location 
-	    ON site.site_id = sample_location.site_id
-	  INNER JOIN sample_result
-	    ON sample_location.location_id = sample_result.location_id
-	  INNER JOIN sample_parameter
-	    ON sample_result.param_cd = sample_parameter.param_cd
-	"""
-    sample_results = (
-        Site.join(SampleLocation.site_id)
-        .join(SampleResult.location_id)
-        .join(SampleParameter.param_cd)
-        .query.all()
-    )
+    sample_results = SampleResult.query.all()
     return render_template("sample_results.html", sample_results=sample_results)

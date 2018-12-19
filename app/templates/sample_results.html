@@ -9,7 +9,8 @@
 			<th scope="col">Site</th>
 			<th scope="col">Sample Location</th>
 			<th scope="col">Sample Date</th>
-			<th scope="col">Parameter</th>
+            <th scope="col">SRSName</th>
+			<th scope="col">Parameter Description</th>
 			<th scope="col">Flag</th>
 			<th scope="col">Result</th>
 			<th scope="col">Unit</th>
@@ -21,11 +22,13 @@
     <tbody>
     {% for result in sample_results %}
 	<tr>
-		<td>{{ result.site_name }}</td>
+		<td>{{ result.site.site_name }}</td>
 		<td>{{ result.location_id }}</td>
 		<td>{{ result.sample_date }}</td>
-		<td>{{ result.description }}</td>
+        <td>{{ result.sample_parameter.srsname }}</td>
+		<td>{{ result.sample_parameter.description }}</td>
 		<td>{{ result.analysis_flag }}</td>
+        <td>{{ result.analysis_result }}</td>
 		<td>{{ result.analysis_unit }}</td>
 		<td>{{ result.detection_limit }}</td>
 		<td>{{ result.reporting_limit }}</td>

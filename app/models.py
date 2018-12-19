@@ -58,8 +58,10 @@ class Site(db.Model):
     state = db.Column(db.CHAR(2))
     zipcode = db.Column(db.String)
     site_geog = db.Column(Geography("POINT", 4326))
-    
     coords = db.column_property(functions.ST_AsGeoJSON(site_geog))
+    
+    def __repr__(self):
+        return "<Site(site_name='%s', address='%s', city='%s', state='%s', zipcode='%s')>" % (self.site_name, self.address, self.city, self.state, self.zipcode)
 
     def to_json(self):
         json_site = {
@@ -83,10 +85,24 @@ class SampleLocation(db.Model):
     )
     location_type = db.Column(db.Text)
     location_geog = db.Column(Geography("POINT", 4326))
-
+    coords = db.column_property(functions.ST_AsGeoJSON(location_geog))
+    
     site = db.relationship("Site")
 
+    def __repr__(self):
+        return "<SampleLocation(location_id='%s', location_type='%s')>" % (self.location_id, self.location_type)
+    
+    def to_json(self):
+        json_sample_location = {
+                'url': url_for('api.get_sample_location', location_id_id=self.location_id),
+                'site': self.site.site_name,
+                'location_id': self.location_id,
+                'location_type': self.location_type,
+                'geometry': json.loads(self.coords)
+        }
+        return json_sample_location
 
+        
 class Unit(db.Model):
     __tablename__ = "unit"
 
@@ -122,12 +138,12 @@ class SampleResult(db.Model):
     )
     param_cd = db.Column(db.ForeignKey("sample_parameter.param_cd"), nullable=False)
     sample_date = db.Column(db.Date, nullable=False)
-    sample_time = db.Column(db.Time)
-    medium_cd = db.Column(db.ForeignKey("medium_code.medium_cd"))
+    sample_time = db.Column(db.Time, nullable=True)
+    medium_cd = db.Column(db.ForeignKey("medium_code.medium_cd"), default="WG")
     prep_method = db.Column(db.Text)
-    analysis_method = db.Column(db.Text)
-    analysis_flag = db.Column(db.CHAR(1))
-    analysis_result = db.Column(db.Float)
+    analysis_method = db.Column(db.Text, nullable=True)
+    analysis_flag = db.Column(db.CHAR(1), nullable=True)
+    analysis_result = db.Column(db.Float, nullable=True)
     analysis_unit = db.Column(db.Text, nullable=False)
     detection_limit = db.Column(db.Float)
     reporting_limit = db.Column(db.Float)
