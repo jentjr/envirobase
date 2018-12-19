@@ -1,20 +1,32 @@
-from configparser import ConfigParser
+import os
+basedir = os.path.abspath(os.path.dirname(__file__))
 
 
-def config(filename="database.ini", section="postgresql"):
-    """Configure database"""
+class Config:
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'hard to guess string'
+    SSL_REDIRECT = False
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_RECORD_QUERIES = True
 
-    parser = ConfigParser()
-    parser.read(filename)
+    @staticmethod
+    def init_app(app):
+        pass
 
-    db = {}
-    if parser.has_section(section):
-        params = parser.items(section)
-        for param in params:
-            db[param[0]] = param[1]
-    else:
-        raise Exception(
-            "Section {0} not found in the {1} file".format(section, filename)
-        )
 
-    return db
+class DevelopmentConfig(Config):
+    DEBUG = True
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL')
+
+
+class TestingConfig(Config):
+    TESTING = True
+    SQLALCHEMY_DATABASE_URI = os.environ.get('TEST_DATABASE_URL')
+    WTF_CSRF_ENABLED = False
+
+
+config = {
+    'development': DevelopmentConfig,
+    'testing': TestingConfig,
+
+    'default': DevelopmentConfig
+}

@@ -44,9 +44,9 @@ CREATE TABLE IF NOT EXISTS sample_parameter (
 
 CREATE TABLE IF NOT EXISTS medium_code (
     medium_cd VARCHAR(3) PRIMARY KEY,
-	medium_name VARCHAR(64),
-	medium_description VARCHAR,
-	legacy_cd CHAR(1)
+    medium_name VARCHAR(64),
+    medium_description VARCHAR,
+    legacy_cd CHAR(1)
 );
 
 CREATE TABLE IF NOT EXISTS sample_result (
@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS sample_result (
     location_id VARCHAR NOT NULL REFERENCES sample_location(location_id),
     param_cd VARCHAR(5) NOT NULL REFERENCES sample_parameter(param_cd),
     sample_date DATE NOT NULL,
-	sample_time TIME NULL,
+    sample_time TIME NULL,
     medium_cd VARCHAR(3) REFERENCES medium_code(medium_cd),
     prep_method VARCHAR NULL,
     analysis_method VARCHAR NULL,

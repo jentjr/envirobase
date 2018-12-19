@@ -16,11 +16,11 @@
     <tbody>
     {% for parameter in parameters %}
 	<tr>
-		<td>{{parameter[0]}}</td>
-		<td>{{parameter[1]}}</td>
-		<td>{{parameter[2]}}</td>
-		<td>{{parameter[3]}}</td>
-		<td>{{parameter[4]}}</td>
+		<td>{{ parameter.param_cd }}</td>
+		<td>{{ parameter.group_name }}</td>
+		<td>{{ parameter.srsname }}</td>
+		<td>{{ parameter.description }}</td>
+		<td>{{ parameter.parameter_unit }}</td>
 	</tr>
 	{% endfor %}
 	</tbody>

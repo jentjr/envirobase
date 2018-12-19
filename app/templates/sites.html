@@ -15,14 +15,14 @@
 		</tr>
 	</thead>
 	<tbody>
-    {% for site in sites['features'] %}
+    {% for site in sites %}
 	<tr>
-		<td>{{ site['properties']['site_name'] }}</td>
-		<td>{{ site['properties']['address'] }}</td>
-		<td>{{ site['properties']['city'] }}</td>
-		<td>{{ site['properties']['state'] }}</td>
-		<td>{{ site['properties']['zipcode'] }}</td>
-		<td>{{ site['geometry']['coordinates'] }}</td>
+		<td>{{ site.site_name }}</td>
+		<td>{{ site.address }}</td>
+		<td>{{ site.city }}</td>
+		<td>{{ site.state }}</td>
+		<td>{{ site.zipcode }}</td>
+		<td>{{ site.site_geom }}</td>
 	</tr>
 	{% endfor %}
 	</tbody>

@@ -1,0 +1,155 @@
+from . import db
+from geoalchemy2.types import Geography
+
+
+class Boring(db.Model):
+    __tablename__ = "boring"
+
+    boring_id = db.Column(db.Integer, primary_key=True)
+    start_date = db.Column(db.Date)
+    end_date = db.Column(db.Date)
+
+
+class MediumCode(db.Model):
+    __tablename__ = "medium_code"
+
+    medium_cd = db.Column(db.String(3), primary_key=True)
+    medium_name = db.Column(db.String(64))
+    medium_description = db.Column(db.Text)
+    legacy_cd = db.Column(db.CHAR(1))
+
+
+class SampleParameter(db.Model):
+    __tablename__ = "sample_parameter"
+    __table_args__ = (
+        db.CheckConstraint(
+            "param_cd ~ similar_escape('[[:digit:]]{5}'::text, NULL::text)"
+        ),
+    )
+
+    param_cd = db.Column(db.CHAR(5), primary_key=True)
+    group_name = db.Column(db.Text)
+    description = db.Column(db.Text)
+    epa_equivalence = db.Column(db.Text)
+    statistical_basis = db.Column(db.Text)
+    time_basis = db.Column(db.Text)
+    weight_basis = db.Column(db.Text)
+    particle_size_basis = db.Column(db.Text)
+    sample_fraction = db.Column(db.Text)
+    temperature_basis = db.Column(db.Text)
+    casrn = db.Column(db.Text)
+    srsname = db.Column(db.Text)
+    parameter_unit = db.Column(db.Text)
+
+
+class Site(db.Model):
+    __tablename__ = "site"
+
+    site_id = db.Column(
+        db.Integer,
+        primary_key=True,
+        server_default=db.text("nextval('site_site_id_seq'::regclass)"),
+    )
+    site_name = db.Column(db.Text, nullable=False, unique=True)
+    address = db.Column(db.Text)
+    city = db.Column(db.Text)
+    state = db.Column(db.CHAR(2))
+    zipcode = db.Column(db.String)
+    site_geog = db.Column(Geography("POINT", 4326))
+
+
+class SampleLocation(db.Model):
+    __tablename__ = "sample_location"
+    __table_args__ = (db.UniqueConstraint("location_id", "site_id"),)
+
+    location_id = db.Column(db.Text, primary_key=True)
+    site_id = db.Column(
+        db.ForeignKey("site.site_id", ondelete="CASCADE", onupdate="CASCADE")
+    )
+    location_type = db.Column(db.Text)
+    location_geog = db.Column(Geography("POINT", 4326))
+
+    site = db.relationship("Site")
+
+
+class Unit(db.Model):
+    __tablename__ = "unit"
+
+    unit_id = db.Column(
+        db.Integer,
+        primary_key=True,
+        server_default=db.text("nextval('unit_unit_id_seq'::regclass)"),
+    )
+    site_id = db.Column(db.ForeignKey("site.site_id"))
+    unit_name = db.Column(db.Text, nullable=False, unique=True)
+    unit_geog = db.Column(Geography("POLYGON", 4326))
+
+    site = db.relationship("Site")
+
+
+class SampleResult(db.Model):
+    __tablename__ = "sample_result"
+    __table_args__ = (
+        db.UniqueConstraint(
+            "lab_id", "location_id", "sample_date", "param_cd", "analysis_result"
+        ),
+    )
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True,
+        server_default=db.text("nextval('sample_result_id_seq'::regclass)"),
+    )
+    site_id = db.Column(db.ForeignKey("site.site_id"), nullable=False)
+    lab_id = db.Column(db.Text)
+    location_id = db.Column(
+        db.ForeignKey("sample_location.location_id"), nullable=False
+    )
+    param_cd = db.Column(db.ForeignKey("sample_parameter.param_cd"), nullable=False)
+    sample_date = db.Column(db.Date, nullable=False)
+    sample_time = db.Column(db.Time)
+    medium_cd = db.Column(db.ForeignKey("medium_code.medium_cd"))
+    prep_method = db.Column(db.Text)
+    analysis_method = db.Column(db.Text)
+    analysis_flag = db.Column(db.CHAR(1))
+    analysis_result = db.Column(db.Float)
+    analysis_unit = db.Column(db.Text, nullable=False)
+    detection_limit = db.Column(db.Float)
+    reporting_limit = db.Column(db.Float)
+    analysis_qualifier = db.Column(db.CHAR(1))
+    disclaimer = db.Column(db.Text)
+    analysis_date = db.Column(db.DateTime)
+    order_comment = db.Column(db.Text)
+    analysis_comment = db.Column(db.Text)
+
+    location = db.relationship("SampleLocation")
+    medium_code = db.relationship("MediumCode")
+    sample_parameter = db.relationship("SampleParameter")
+    site = db.relationship("Site")
+
+
+class Well(db.Model):
+    __tablename__ = "well"
+    
+    well_id = db.Column(db.Integer, primary_key=True, server_default=db.text("nextval('well_id_seq'::regclass)"))
+    location_id = db.Column(db.Integer, db.ForeignKey("sample_location.location_id"), nullable=False)
+    boring_id = db.Column(db.Integer, db.ForeignKey("boring.boring_id"), nullable=False)
+    install_date = db.Column(db.Date)
+    top_riser = db.Column(db.Float)
+    top_bent_seal = db.Column(db.Float)
+    top_gravel_pack = db.Column(db.Float)
+    top_screen = db.Column(db.Float)
+    bottom_screen = db.Column(db.Float)
+    bottom_well = db.Column(db.Float)
+    bottom_gravel_pack = db.Column(db.Float)
+    bottom_boring = db.Column(db.Float)
+    grout_seal_desc = db.Column(db.Text)
+    bent_seal_desc = db.Column(db.Text)
+    screen_type = db.Column(db.Text)
+    gravel_pack_desc = db.Column(db.Text)
+    riser_pipe_desc = db.Column(db.Text)
+    spacer_depths = db.Column(db.Text)
+    notes = db.Column(db.Text)
+    
+    boring = db.relationship("Boring")
+    sample_location = db.relationship("SampleLocation")

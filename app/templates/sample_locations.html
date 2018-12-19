@@ -12,11 +12,11 @@
 		</tr>
 	</thead>
 	<tbody>
-    {% for location in sample_locations['features'] %}
+    {% for location in sample_locations %}
 	<tr>
-		<td>{{ location['properties']['location_id'] }}</td>
-		<td>{{ location['properties']['location_type'] }}</td>
-		<td>{{ location['geometry']['coordinates'] }}</td>
+		<td>{{ location.location_id }}</td>
+		<td>{{ location.location_type }}</td>
+		<td>{{ location.location_geom }}</td>
 	</tr>
 	{% endfor %}
 	</tbody>
