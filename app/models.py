@@ -1,10 +1,28 @@
 import json
 from . import db
+from datetime import datetime
 from geoalchemy2 import functions
 from geoalchemy2.types import Geography
 from flask import current_app, request, url_for
 
-class Boring(db.Model):
+
+class BaseExtension(db.MapperExtension):
+    """Base extension for all entities."""
+    
+    def before_insert(self, mapper, connection, instance):
+        instance.created_on = datetime.now()
+        
+    def before_update(self, mapper, connection, instance):
+        instance.updated_on = datetime.now()
+        
+
+class BaseEntity(object):
+    __mapper_args__ = {'extension': BaseExtension()}
+    
+    created_on = db.Column(db.DateTime(6))
+
+
+class Boring(db.Model, BaseEntity):
     __tablename__ = "boring"
 
     boring_id = db.Column(db.Integer, primary_key=True)
@@ -12,7 +30,7 @@ class Boring(db.Model):
     end_date = db.Column(db.Date)
 
 
-class MediumCode(db.Model):
+class MediumCode(db.Model, BaseEntity):
     __tablename__ = "medium_code"
 
     medium_cd = db.Column(db.String(3), primary_key=True)
@@ -21,7 +39,7 @@ class MediumCode(db.Model):
     legacy_cd = db.Column(db.CHAR(1))
 
 
-class SampleParameter(db.Model):
+class SampleParameter(db.Model, BaseEntity):
     __tablename__ = "sample_parameter"
     __table_args__ = (
         db.CheckConstraint(
@@ -44,13 +62,13 @@ class SampleParameter(db.Model):
     parameter_unit = db.Column(db.Text)
 
 
-class Site(db.Model):
+class Site(db.Model, BaseEntity):
     __tablename__ = "site"
 
     site_id = db.Column(
         db.Integer,
-        primary_key=True,
-        server_default=db.text("nextval('site_site_id_seq'::regclass)"),
+        db.Sequence('site_id_seq'),
+        primary_key=True
     )
     site_name = db.Column(db.Text, nullable=False, unique=True)
     address = db.Column(db.Text)
@@ -75,7 +93,7 @@ class Site(db.Model):
         return json_site
 
 
-class SampleLocation(db.Model):
+class SampleLocation(db.Model, BaseEntity):
     __tablename__ = "sample_location"
     __table_args__ = (db.UniqueConstraint("location_id", "site_id"),)
 
@@ -103,13 +121,13 @@ class SampleLocation(db.Model):
         return json_sample_location
 
         
-class Unit(db.Model):
+class Unit(db.Model, BaseEntity):
     __tablename__ = "unit"
 
     unit_id = db.Column(
         db.Integer,
+        db.Sequence('unit_id_seq'),
         primary_key=True,
-        server_default=db.text("nextval('unit_unit_id_seq'::regclass)"),
     )
     site_id = db.Column(db.ForeignKey("site.site_id"))
     unit_name = db.Column(db.Text, nullable=False, unique=True)
@@ -118,7 +136,7 @@ class Unit(db.Model):
     site = db.relationship("Site")
 
 
-class SampleResult(db.Model):
+class SampleResult(db.Model, BaseEntity):
     __tablename__ = "sample_result"
     __table_args__ = (
         db.UniqueConstraint(
@@ -128,8 +146,8 @@ class SampleResult(db.Model):
 
     id = db.Column(
         db.Integer,
-        primary_key=True,
-        server_default=db.text("nextval('sample_result_id_seq'::regclass)"),
+        db.Sequence('sample_result_id_seq'),
+        primary_key=True
     )
     site_id = db.Column(db.ForeignKey("site.site_id"), nullable=False)
     lab_id = db.Column(db.Text)
@@ -159,11 +177,11 @@ class SampleResult(db.Model):
     site = db.relationship("Site")
 
 
-class Well(db.Model):
+class Well(db.Model, BaseEntity):
     __tablename__ = "well"
     
-    well_id = db.Column(db.Integer, primary_key=True, server_default=db.text("nextval('well_id_seq'::regclass)"))
-    location_id = db.Column(db.Integer, db.ForeignKey("sample_location.location_id"), nullable=False)
+    well_id = db.Column(db.Integer, db.Sequence('well_id_seq'), primary_key=True)
+    location_id = db.Column(db.Text, db.ForeignKey("sample_location.location_id"), nullable=False)
     boring_id = db.Column(db.Integer, db.ForeignKey("boring.boring_id"), nullable=False)
     install_date = db.Column(db.Date)
     top_riser = db.Column(db.Float)

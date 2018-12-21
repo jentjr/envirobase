@@ -12,6 +12,9 @@ flask-bootstrap = "*"
 geoalchemy2 = "*"
 psycopg2-binary = "*"
 psycopg2 = "*"
+flask-migrarte = "*"
+flask-migrate = "*"
+flask-migrates = "*"
 
 [requires]
 python_version = "3.6"
