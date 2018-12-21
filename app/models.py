@@ -65,11 +65,7 @@ class SampleParameter(db.Model, BaseEntity):
 class Site(db.Model, BaseEntity):
     __tablename__ = "site"
 
-    site_id = db.Column(
-        db.Integer,
-        db.Sequence('site_id_seq'),
-        primary_key=True
-    )
+    site_id = db.Column(db.Integer, primary_key=True)
     site_name = db.Column(db.Text, nullable=False, unique=True)
     address = db.Column(db.Text)
     city = db.Column(db.Text)
@@ -124,11 +120,7 @@ class SampleLocation(db.Model, BaseEntity):
 class Unit(db.Model, BaseEntity):
     __tablename__ = "unit"
 
-    unit_id = db.Column(
-        db.Integer,
-        db.Sequence('unit_id_seq'),
-        primary_key=True,
-    )
+    unit_id = db.Column(db.Integer, primary_key=True)
     site_id = db.Column(db.ForeignKey("site.site_id"))
     unit_name = db.Column(db.Text, nullable=False, unique=True)
     unit_geog = db.Column(Geography("POLYGON", 4326))
@@ -144,11 +136,7 @@ class SampleResult(db.Model, BaseEntity):
         ),
     )
 
-    id = db.Column(
-        db.Integer,
-        db.Sequence('sample_result_id_seq'),
-        primary_key=True
-    )
+    id = db.Column(db.Integer, primary_key=True)
     site_id = db.Column(db.ForeignKey("site.site_id"), nullable=False)
     lab_id = db.Column(db.Text)
     location_id = db.Column(
@@ -180,7 +168,7 @@ class SampleResult(db.Model, BaseEntity):
 class Well(db.Model, BaseEntity):
     __tablename__ = "well"
     
-    well_id = db.Column(db.Integer, db.Sequence('well_id_seq'), primary_key=True)
+    well_id = db.Column(db.Integer, primary_key=True)
     location_id = db.Column(db.Text, db.ForeignKey("sample_location.location_id"), nullable=False)
     boring_id = db.Column(db.Integer, db.ForeignKey("boring.boring_id"), nullable=False)
     install_date = db.Column(db.Date)
