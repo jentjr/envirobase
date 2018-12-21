@@ -1,24 +1,26 @@
 import json
 from . import db
+import pandas as pd
 from datetime import datetime
 from geoalchemy2 import functions
 from geoalchemy2.types import Geography
 from flask import current_app, request, url_for
+from .errors import AlreadyExistsError
 
 
 class BaseExtension(db.MapperExtension):
     """Base extension for all entities."""
-    
+
     def before_insert(self, mapper, connection, instance):
         instance.created_on = datetime.now()
-        
+
     def before_update(self, mapper, connection, instance):
         instance.updated_on = datetime.now()
-        
+
 
 class BaseEntity(object):
-    __mapper_args__ = {'extension': BaseExtension()}
-    
+    __mapper_args__ = {"extension": BaseExtension()}
+
     created_on = db.Column(db.DateTime)
 
 
@@ -37,6 +39,28 @@ class MediumCode(db.Model, BaseEntity):
     medium_name = db.Column(db.String(64))
     medium_description = db.Column(db.Text)
     legacy_cd = db.Column(db.CHAR(1))
+
+    def __init__(self, **kwargs):
+        super(MediumCode, self).__init__(**kwargs)
+
+    def _insert_medium_codes():
+        """Inserts USGS Medium Codes. If the codes have already been entered, an error is thrown."""
+        if MediumCode.query.first():
+            raise AlreadyExistsError("Medium Codes have already been entered.")
+        else:
+            url = "https://help.waterdata.usgs.gov/medium_cd"
+            df = pd.read_html(url, header=0, converters={0: str})[0]
+            df.rename(
+                index=str,
+                columns={
+                    "Medium Code": "medium_cd",
+                    "Medium Name": "medium_name",
+                    "Medium Description": "medium_description",
+                    "Medium Legacy Code": "legacy_cd",
+                },
+                inplace=True,
+            )
+            df.to_sql("medium_code", con=db.engine, if_exists="append", index=False)
 
 
 class SampleParameter(db.Model, BaseEntity):
@@ -61,6 +85,39 @@ class SampleParameter(db.Model, BaseEntity):
     srsname = db.Column(db.Text)
     parameter_unit = db.Column(db.Text)
 
+    def __init__(self, **kwargs):
+        super(SampleParameter, self).__init__(**kwargs)
+
+    def _insert_param_codes():
+        """Inserts USGS Parameter Codes. If the codes have already been entered, an error is thrown."""
+        if SampleParameter.query.first():
+            raise AlreadyExistsError("Parameter Codes have already been entered.")
+        else:
+            url = "https://help.waterdata.usgs.gov/parameter_cd?group_cd=%"
+            df = pd.read_html(url, header=0, converters={0: str})[0]
+            df.rename(
+                index=str,
+                columns={
+                    "Parameter Code": "param_cd",
+                    "Group Name": "group_name",
+                    "Parameter Name/Description": "description",
+                    "Epa equivalence": "epa_equivalence",
+                    "Result Statistical Basis": "statistical_basis",
+                    "Result Time Basis": "time_basis",
+                    "Result Weight Basis": "weight_basis",
+                    "Result Particle Size Basis": "particle_size_basis",
+                    "Result Sample Fraction": "sample_fraction",
+                    "Result Temperature Basis": "temperature_basis",
+                    "CASRN": "casrn",
+                    "SRSName": "srsname",
+                    "Parameter Unit": "parameter_unit",
+                },
+                inplace=True,
+            )
+            df.to_sql(
+                "sample_parameter", con=db.engine, if_exists="append", index=False
+            )
+
 
 class Site(db.Model, BaseEntity):
     __tablename__ = "site"
@@ -73,18 +130,21 @@ class Site(db.Model, BaseEntity):
     zipcode = db.Column(db.String)
     site_geog = db.Column(Geography("POINT", 4326))
     coords = db.column_property(functions.ST_AsGeoJSON(site_geog))
-    
+
     def __repr__(self):
-        return "<Site(site_name='%s', address='%s', city='%s', state='%s', zipcode='%s')>" % (self.site_name, self.address, self.city, self.state, self.zipcode)
+        return (
+            "<Site(site_name='%s', address='%s', city='%s', state='%s', zipcode='%s')>"
+            % (self.site_name, self.address, self.city, self.state, self.zipcode)
+        )
 
     def to_json(self):
         json_site = {
-                'url': url_for('api.get_site', site_id=self.site_id),
-                'site_name': self.site_name,
-                'address': self.address,
-                'city': self.city,
-                'state': self.state,
-                'geometry': json.loads(self.coords)
+            "url": url_for("api.get_site", site_id=self.site_id),
+            "site_name": self.site_name,
+            "address": self.address,
+            "city": self.city,
+            "state": self.state,
+            "geometry": json.loads(self.coords),
         }
         return json_site
 
@@ -100,23 +160,26 @@ class SampleLocation(db.Model, BaseEntity):
     location_type = db.Column(db.Text)
     location_geog = db.Column(Geography("POINT", 4326))
     coords = db.column_property(functions.ST_AsGeoJSON(location_geog))
-    
+
     site = db.relationship("Site")
 
     def __repr__(self):
-        return "<SampleLocation(location_id='%s', location_type='%s')>" % (self.location_id, self.location_type)
-    
+        return "<SampleLocation(location_id='%s', location_type='%s')>" % (
+            self.location_id,
+            self.location_type,
+        )
+
     def to_json(self):
         json_sample_location = {
-                'url': url_for('api.get_sample_location', location_id_id=self.location_id),
-                'site': self.site.site_name,
-                'location_id': self.location_id,
-                'location_type': self.location_type,
-                'geometry': json.loads(self.coords)
+            "url": url_for("api.get_sample_location", location_id_id=self.location_id),
+            "site": self.site.site_name,
+            "location_id": self.location_id,
+            "location_type": self.location_type,
+            "geometry": json.loads(self.coords),
         }
         return json_sample_location
 
-        
+
 class Unit(db.Model, BaseEntity):
     __tablename__ = "unit"
 
@@ -167,9 +230,11 @@ class SampleResult(db.Model, BaseEntity):
 
 class Well(db.Model, BaseEntity):
     __tablename__ = "well"
-    
+
     well_id = db.Column(db.Integer, primary_key=True)
-    location_id = db.Column(db.Text, db.ForeignKey("sample_location.location_id"), nullable=False)
+    location_id = db.Column(
+        db.Text, db.ForeignKey("sample_location.location_id"), nullable=False
+    )
     boring_id = db.Column(db.Integer, db.ForeignKey("boring.boring_id"), nullable=False)
     install_date = db.Column(db.Date)
     top_riser = db.Column(db.Float)
@@ -187,6 +252,6 @@ class Well(db.Model, BaseEntity):
     riser_pipe_desc = db.Column(db.Text)
     spacer_depths = db.Column(db.Text)
     notes = db.Column(db.Text)
-    
+
     boring = db.relationship("Boring")
     sample_location = db.relationship("SampleLocation")
