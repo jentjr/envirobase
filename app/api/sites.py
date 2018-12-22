@@ -1,3 +1,7 @@
+"""
+API for Sites
+"""
+
 from flask import jsonify, request, current_app, url_for
 from . import api
 from .. import db
@@ -36,6 +40,7 @@ def edit_site(site_id):
     site.city = request.json.get("city", site.city)
     site.state = request.json.get("state", site.state)
     site.zipcode = request.json.get("zipcode", site.zipcode)
+    site.site_geog = request.json.get("site_geog", site.site_geog)
     db.session.add(site)
     db.session.commit()
     return jsonify(site.to_json())

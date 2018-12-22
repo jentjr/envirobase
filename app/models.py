@@ -134,10 +134,16 @@ class Site(db.Model, BaseEntity):
 
     def __repr__(self):
         return (
-            "<Site(site_name='%s', address='%s', city='%s', state='%s', zipcode='%s')>"
-            % (self.site_name, self.address, self.city, self.state, self.zipcode)
+            "<Site(site_name='%s', address='%s', city='%s', state='%s', zipcode='%s', coords='%s')>"
+            % (self.site_name, self.address, self.city, self.state, self.zipcode, self.coords)
         )
 
+    def _serializer(self, value):
+        if value is None:
+            return value
+        else:
+            return json.loads(value)
+    
     def to_json(self):
         json_site = {
             "url": url_for("api.get_site", site_id=self.site_id),
@@ -146,7 +152,7 @@ class Site(db.Model, BaseEntity):
             "city": self.city,
             "state": self.state,
             "zipcode": self.zipcode,
-            "geometry": json.loads(self.coords)
+            "geometry": self._serializer(self.coords)
         }
         return json_site
 
@@ -157,7 +163,7 @@ class Site(db.Model, BaseEntity):
         city = json_site.get("city")
         state = json_site.get("state")
         zipcode = json_site.get("zipcode")
-        site_geog = json_site.get(json.dumps("site_geog"))
+        site_geog = json_site.get("site_geog")
         if site_name is None or site_name == "":
             raise ValidationError("site does not have a name")
         return Site(
