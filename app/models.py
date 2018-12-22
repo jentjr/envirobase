@@ -22,6 +22,7 @@ class BaseEntity(object):
     __mapper_args__ = {"extension": BaseExtension()}
 
     created_on = db.Column(db.DateTime)
+    updated_on = db.Column(db.DateTime)
 
 
 class Boring(db.Model, BaseEntity):

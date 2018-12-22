@@ -24,10 +24,22 @@ def sites():
     return render_template("sites.html", sites=sites)
 
 
+@main.route("/units")
+def units():
+    units = Unit.query.all()
+    return render_template("units.html", units=units)
+
+
 @main.route("/sample_locations")
 def sample_locations():
     sample_locations = SampleLocation.query.all()
     return render_template("sample_locations.html", sample_locations=sample_locations)
+
+
+@main.route("/sample_results")
+def sample_results():
+    sample_results = SampleResult.query.all()
+    return render_template("sample_results.html", sample_results=sample_results)
 
 
 @main.route("/parameters")
@@ -36,7 +48,7 @@ def parameters():
     return render_template("parameters.html", parameters=parameters)
 
 
-@main.route("/sample_results")
-def sample_results():
-    sample_results = SampleResult.query.all()
-    return render_template("sample_results.html", sample_results=sample_results)
+@main.route("/mediums")
+def mediums():
+    mediums = MediumCode.query.all()
+    return render_template("mediums.html", mediums=mediums)
