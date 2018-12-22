@@ -56,7 +56,7 @@ class MediumCode(db.Model, BaseEntity):
                 columns={
                     "Medium Code": "medium_cd",
                     "Medium Name": "medium_name",
-                    "Medium Description": "medium_description",
+                    "Medium Description": "medium_description", - Columbus
                     "Medium Legacy Code": "legacy_cd",
                 },
                 inplace=True,
