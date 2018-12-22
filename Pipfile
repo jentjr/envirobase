@@ -13,6 +13,8 @@ geoalchemy2 = "*"
 psycopg2-binary = "*"
 psycopg2 = "*"
 flask-migrate = "*"
+flask-wtf = "*"
+wtforms = "*"
 
 [requires]
 python_version = "3.6"

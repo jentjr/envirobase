@@ -145,9 +145,21 @@ class Site(db.Model, BaseEntity):
             "address": self.address,
             "city": self.city,
             "state": self.state,
-            "geometry": json.loads(self.coords),
+            "zipcode": self.zipcode,
+            #"geometry": json.loads(self.coords),
         }
         return json_site
+    
+    @staticmethod
+    def from_json(json_site):
+        site_name = json_site.get('site_name')
+        address= json_site.get('address')
+        city = json_site.get('city')
+        state = json_site.get('state')
+        zipcode = json_site.get('zipcode')
+        if site_name is None or site_name == '':
+            raise ValidationError("site does not have a name")
+        return Site(site_name=site_name, address=address, city=city, state=state, zipcode=zipcode)
 
 
 class SampleLocation(db.Model, BaseEntity):
