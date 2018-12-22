@@ -5,9 +5,11 @@ from wtforms.validators import DataRequired, Length
 
 
 class SiteForm(FlaskForm):
-    site_name = StringField("Name of Site", validators=[DataRequired()])
+    name = StringField("Name of Site", validators=[DataRequired()])
     address = StringField("Address")
     city = StringField("City")
     state = StringField("State", validators=[Length(0, 2)])
     zipcode = StringField("Zipcode")
+    longitude = StringField("Longitude")
+    latitude = StringField("Latitude")
     submit = SubmitField("Submit")

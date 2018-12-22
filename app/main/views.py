@@ -35,14 +35,16 @@ def site(site_id):
 def add_site():
     form = SiteForm()
     if form.validate_on_submit():
-        site = Site.query.filter_by(site_name=form.site_name.data).first()
+        site = Site.query.filter_by(name=form.name.data).first()
         if site is None:
             site = Site(
-                site_name=form.site_name.data,
-                address=form.address.data,
-                city=form.city.data,
-                state=form.state.data,
-                zipcode=form.zipcode.data,
+                name = form.name.data,
+                address = form.address.data,
+                city = form.city.data,
+                state = form.state.data,
+                zipcode = form.zipcode.data,
+                longitude = form.longitude.data,
+                latitude = form.latitude.data
             )
             db.session.add(site)
             db.session.commit()
@@ -57,11 +59,13 @@ def edit_site(site_id):
     site = Site.query.get_or_404(site_id)
     form = SiteForm()
     if form.validate_on_submit():
-        site_name = form.site_name.data
+        name = form.name.data
         site.address = form.address.data
         site.city = form.address.data
         site.state = form.state.data
         site.zipcode = form.zipcode.data
+        site.longitude = form.longitude.data
+        site.latitude = form.latitude.data
         db.session.add(site)
         db.session.commit()
         flash("The site has been updated.")
@@ -71,6 +75,8 @@ def edit_site(site_id):
     form.city.data = site.city
     form.state.data = site.state
     form.zipcode.data = site.zipcode
+    form.longitude.data = site.longitude
+    form.latitude.data = site.latitude
     return render_template("edit_site.html", form=form)
 
 

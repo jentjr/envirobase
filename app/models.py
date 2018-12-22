@@ -3,7 +3,7 @@ from . import db
 import pandas as pd
 from datetime import datetime
 from geoalchemy2 import functions
-from geoalchemy2.types import Geography
+from geoalchemy2.types import Geometry
 from flask import current_app, request, url_for
 from .errors import AlreadyExistsError
 
@@ -124,55 +124,79 @@ class Site(db.Model, BaseEntity):
     __tablename__ = "site"
 
     site_id = db.Column(db.Integer, primary_key=True)
-    site_name = db.Column(db.Text, nullable=False, unique=True)
+    name = db.Column(db.Text, nullable=False, unique=True)
     address = db.Column(db.Text)
     city = db.Column(db.Text)
     state = db.Column(db.CHAR(2))
     zipcode = db.Column(db.String)
-    site_geog = db.Column(Geography("POINT", 4326))
-    coords = db.column_property(functions.ST_AsGeoJSON(site_geog))
+    longitude = db.Column(db.Float, nullable = True)
+    latitude = db.Column(db.Float, nullable = True)
+    geometry = db.Column(Geometry(geometry_type="POINT"))
 
     def __repr__(self):
         return (
-            "<Site(site_name='%s', address='%s', city='%s', state='%s', zipcode='%s', coords='%s')>"
-            % (self.site_name, self.address, self.city, self.state, self.zipcode, self.coords)
+            "<Site(ame='%s', address='%s', city='%s', state='%s', zipcode='%s', longitude='%s', latitude='%s')>"
+            % (self.name, self.address, self.city, self.state, self.zipcode, self.longitude, self.latitude)
         )
 
-    def _serializer(self, value):
-        if value is None:
-            return value
-        else:
-            return json.loads(value)
+    @classmethod
+    def add_site(cls, name, address, city, state, zipcode, longitude, latitude):
+        """Add a new site in the database."""
+
+        geometry = 'POINT({} {})'.format(longitude, latitude)
+        site = Site(name=name, address=address, city=city, state=state, zipcode=zipcode,
+                           longitude=longitude,
+                           latitude=latitude,
+                          geometry=geometry)
+
+        db.session.add(site)
+        db.session.commit()
+        
+    @classmethod
+    def update_geometries(cls):
+        """Using each site's longitude and latitude, add geometry data to db."""
+
+        sites = Site.query.all()
+
+        for site in sites:
+            point = 'POINT({} {})'.format(site.longitude, site.latitude)
+            site.geometry = point
+
+        db.session.commit()
+
     
     def to_json(self):
         json_site = {
             "url": url_for("api.get_site", site_id=self.site_id),
-            "site_name": self.site_name,
+            "name": self.name,
             "address": self.address,
             "city": self.city,
             "state": self.state,
             "zipcode": self.zipcode,
-            "geometry": self._serializer(self.coords)
+            "longitude": self.longitude,
+            "latitude": self.latitude
         }
         return json_site
 
     @staticmethod
     def from_json(json_site):
-        site_name = json_site.get("site_name")
+        name = json_site.get("name")
         address = json_site.get("address")
         city = json_site.get("city")
         state = json_site.get("state")
         zipcode = json_site.get("zipcode")
-        site_geog = json_site.get("site_geog")
-        if site_name is None or site_name == "":
-            raise ValidationError("site does not have a name")
+        longitude = json_site.get("longitude")
+        latitude = json_site.get("latitude")
+        if name is None or name == "":
+            raise ValidationError("Site must have a name")
         return Site(
-            site_name=site_name,
+            name=name,
             address=address,
             city=city,
             state=state,
             zipcode=zipcode,
-            site_geog=site_geog
+            longitude=longitude,
+            latitude=latitude
         )
 
 
@@ -185,8 +209,8 @@ class SampleLocation(db.Model, BaseEntity):
         db.ForeignKey("site.site_id", ondelete="CASCADE", onupdate="CASCADE")
     )
     location_type = db.Column(db.Text)
-    location_geog = db.Column(Geography("POINT", 4326))
-    coords = db.column_property(functions.ST_AsGeoJSON(location_geog))
+    geometry = db.Column(Geometry("POINT", 4326))
+    coords = db.column_property(functions.ST_AsGeoJSON(geometry))
 
     site = db.relationship("Site")
 
@@ -225,8 +249,8 @@ class Unit(db.Model, BaseEntity):
     unit_id = db.Column(db.Integer, primary_key=True)
     site_id = db.Column(db.ForeignKey("site.site_id"))
     unit_name = db.Column(db.Text, nullable=False, unique=True)
-    unit_geog = db.Column(Geography("POLYGON", 4326))
-    coords = db.column_property(functions.ST_AsGeoJSON(unit_geog))
+    geometry = db.Column(Geometry("POLYGON", 4326))
+    coords = db.column_property(functions.ST_AsGeoJSON(geometry))
     
     site = db.relationship("Site")
     

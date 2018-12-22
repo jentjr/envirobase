@@ -12,6 +12,8 @@
 			<th scope="col">City</th>
 			<th scope="col">State</th>
 			<th scope="col">Zipcode</th>
+			<th scope="col">Longitude</th>
+			<th scope="col">Latitude</th>
 			<th scope="col">Created On</th>
 			<th scope="col">Last Updated</th>
 		</tr>
@@ -20,11 +22,13 @@
     {% for site in sites %}
 	<tr>
 	    <td>{{ site.site_id }}</td>
-		<td>{{ site.site_name }}</td>
+		<td>{{ site.name }}</td>
 		<td>{{ site.address }}</td>
 		<td>{{ site.city }}</td>
 		<td>{{ site.state }}</td>
 		<td>{{ site.zipcode }}</td>
+		<td>{{ site.longitude }}</td>
+		<td>{{ site.latitude }}</td>
 		<td>{{ site.created_on }}</td>
 		<td>{{ site.updated_on }}</td>
 	</tr>
