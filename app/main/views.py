@@ -31,7 +31,7 @@ def site(site_id):
     return render_template("sites.html", sites=sites)
 
 
-@main.route("/add-site", methods=["GET", "POST"])
+@main.route("/add_site", methods=["GET", "POST"])
 def add_site():
     form = SiteForm()
     if form.validate_on_submit():
@@ -52,7 +52,7 @@ def add_site():
     return render_template("edit_site.html", form=form)
 
 
-@main.route("/edit-site/<int:site_id>", methods=["GET", "POST"])
+@main.route("/edit_site/<int:site_id>", methods=["GET", "POST"])
 def edit_site(site_id):
     site = Site.query.get_or_404(site_id)
     form = SiteForm()

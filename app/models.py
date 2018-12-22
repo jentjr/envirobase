@@ -146,7 +146,7 @@ class Site(db.Model, BaseEntity):
             "city": self.city,
             "state": self.state,
             "zipcode": self.zipcode,
-            # "geometry": json.loads(self.coords),
+            "geometry": json.loads(self.coords)
         }
         return json_site
 
@@ -157,6 +157,7 @@ class Site(db.Model, BaseEntity):
         city = json_site.get("city")
         state = json_site.get("state")
         zipcode = json_site.get("zipcode")
+        site_geog = json_site.get(json.dumps("site_geog"))
         if site_name is None or site_name == "":
             raise ValidationError("site does not have a name")
         return Site(
@@ -165,6 +166,7 @@ class Site(db.Model, BaseEntity):
             city=city,
             state=state,
             zipcode=zipcode,
+            site_geog=site_geog
         )
 
 
@@ -194,9 +196,21 @@ class SampleLocation(db.Model, BaseEntity):
             "site": self.site.site_name,
             "location_id": self.location_id,
             "location_type": self.location_type,
-            "geometry": json.loads(self.coords),
+            "geometry": json.loads(self.coords)
         }
         return json_sample_location
+    
+    @staticmethod
+    def from_json(json_sample_location):
+        site = json_sample_location.get("site.site_name")
+        location_id = json_sample_location.get("location_id")
+        location_type = json_sample_location.get("sample_type")
+        if location_id is None or location_id == "":
+            raise ValidationError("Sample Location does not have an ID")
+        return SampleLocation(
+            location_id=location_id,
+            location_type=location_type
+        )
 
 
 class Unit(db.Model, BaseEntity):
@@ -206,8 +220,20 @@ class Unit(db.Model, BaseEntity):
     site_id = db.Column(db.ForeignKey("site.site_id"))
     unit_name = db.Column(db.Text, nullable=False, unique=True)
     unit_geog = db.Column(Geography("POLYGON", 4326))
-
+    coords = db.column_property(functions.ST_AsGeoJSON(unit_geog))
+    
     site = db.relationship("Site")
+    
+    def __repr__(self):
+        return "<Unit(unit_name='%s')>" % (self.unit_name)
+
+    def to_json(self):
+        json_unit = {
+            "url": url_for("api.get_unit", unit_id=self.unit_id),
+            "unit_name": self.unit_name,
+            # "geometry": json.loads(self.coords),
+        }
+        return json_unit
 
 
 class SampleResult(db.Model, BaseEntity):
