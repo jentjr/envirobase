@@ -129,29 +129,43 @@ class Site(db.Model, BaseEntity):
     city = db.Column(db.Text)
     state = db.Column(db.CHAR(2))
     zipcode = db.Column(db.String)
-    longitude = db.Column(db.Float, nullable = True)
-    latitude = db.Column(db.Float, nullable = True)
-    geometry = db.Column(Geometry(geometry_type="POINT"))
+    longitude = db.Column(db.Float, nullable=True)
+    latitude = db.Column(db.Float, nullable=True)
+    geometry = db.Column(Geometry(geometry_type="POINT", srid=4326))
 
     def __repr__(self):
         return (
             "<Site(ame='%s', address='%s', city='%s', state='%s', zipcode='%s', longitude='%s', latitude='%s')>"
-            % (self.name, self.address, self.city, self.state, self.zipcode, self.longitude, self.latitude)
+            % (
+                self.name,
+                self.address,
+                self.city,
+                self.state,
+                self.zipcode,
+                self.longitude,
+                self.latitude,
+            )
         )
 
     @classmethod
     def add_site(cls, name, address, city, state, zipcode, longitude, latitude):
         """Add a new site in the database."""
 
-        geometry = 'POINT({} {})'.format(longitude, latitude)
-        site = Site(name=name, address=address, city=city, state=state, zipcode=zipcode,
-                           longitude=longitude,
-                           latitude=latitude,
-                          geometry=geometry)
+        geometry = "POINT({} {})".format(longitude, latitude)
+        site = Site(
+            name=name,
+            address=address,
+            city=city,
+            state=state,
+            zipcode=zipcode,
+            longitude=longitude,
+            latitude=latitude,
+            geometry=geometry,
+        )
 
         db.session.add(site)
         db.session.commit()
-        
+
     @classmethod
     def update_geometries(cls):
         """Using each site's longitude and latitude, add geometry data to db."""
@@ -159,12 +173,11 @@ class Site(db.Model, BaseEntity):
         sites = Site.query.all()
 
         for site in sites:
-            point = 'POINT({} {})'.format(site.longitude, site.latitude)
+            point = "POINT({} {})".format(site.longitude, site.latitude)
             site.geometry = point
 
         db.session.commit()
 
-    
     def to_json(self):
         json_site = {
             "url": url_for("api.get_site", site_id=self.site_id),
@@ -174,7 +187,7 @@ class Site(db.Model, BaseEntity):
             "state": self.state,
             "zipcode": self.zipcode,
             "longitude": self.longitude,
-            "latitude": self.latitude
+            "latitude": self.latitude,
         }
         return json_site
 
@@ -196,7 +209,7 @@ class Site(db.Model, BaseEntity):
             state=state,
             zipcode=zipcode,
             longitude=longitude,
-            latitude=latitude
+            latitude=latitude,
         )
 
 
@@ -226,10 +239,10 @@ class SampleLocation(db.Model, BaseEntity):
             "site": self.site.site_name,
             "location_id": self.location_id,
             "location_type": self.location_type,
-            "geometry": json.loads(self.coords)
+            "geometry": json.loads(self.coords),
         }
         return json_sample_location
-    
+
     @staticmethod
     def from_json(json_sample_location):
         site = json_sample_location.get("site.site_name")
@@ -237,10 +250,7 @@ class SampleLocation(db.Model, BaseEntity):
         location_type = json_sample_location.get("sample_type")
         if location_id is None or location_id == "":
             raise ValidationError("Sample Location does not have an ID")
-        return SampleLocation(
-            location_id=location_id,
-            location_type=location_type
-        )
+        return SampleLocation(location_id=location_id, location_type=location_type)
 
 
 class Unit(db.Model, BaseEntity):
@@ -251,9 +261,9 @@ class Unit(db.Model, BaseEntity):
     unit_name = db.Column(db.Text, nullable=False, unique=True)
     geometry = db.Column(Geometry("POLYGON", 4326))
     coords = db.column_property(functions.ST_AsGeoJSON(geometry))
-    
+
     site = db.relationship("Site")
-    
+
     def __repr__(self):
         return "<Unit(unit_name='%s')>" % (self.unit_name)
 

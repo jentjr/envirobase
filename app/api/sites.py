@@ -8,16 +8,75 @@ from .. import db
 from ..models import Site
 
 
-@api.route("/sites/")
+@api.route("/sites/", methods=["GET"])
 def get_sites():
     sites = Site.query.all()
-    return jsonify({"sites": [site.to_json() for site in sites]})
+    data = [
+        {
+            "type": "Feature",
+            "properties": {
+                "site_id": site.site_id,
+                "name": site.name,
+                "address": site.address,
+                "city": site.city,
+                "state": site.state,
+                "zipcode": site.zipcode,
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [site.longitude, site.latitude],
+            },
+        }
+        for site in sites
+    ]
+    return jsonify({"type": "FeatureCollection", "features": data})
 
 
-@api.route("/sites/<int:site_id>")
+@api.route("/sites/<int:site_id>", methods=["GET"])
 def get_site(site_id):
     site = Site.query.get_or_404(site_id)
-    return jsonify(site.to_json())
+    data = [
+        {
+            "type": "Feature",
+            "properties": {
+                "site_id": site.site_id,
+                "name": site.name,
+                "address": site.address,
+                "city": site.city,
+                "state": site.state,
+                "zipcode": site.zipcode,
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [site.longitude, site.latitude],
+            },
+        }
+    ]
+    return jsonify({"type": "FeatureCollection", "features": data})
+
+
+@api.route("/sites/<name>", methods=["GET"])
+def get_site_name(name):
+    sites = Site.query.filter(Site.name.ilike(name + "%")).all()
+    data = [
+        {
+            "type": "Feature",
+            "properties": {
+                "site_id": site.site_id,
+                "name": site.name,
+                "address": site.address,
+                "city": site.city,
+                "state": site.state,
+                "zipcode": site.zipcode,
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [site.longitude, site.latitude],
+            },
+        }
+        for site in sites
+    ]
+    return jsonify({"type": "FeatureCollection", "features": data})
 
 
 @api.route("/sites/", methods=["POST"])
