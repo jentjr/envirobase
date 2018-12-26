@@ -8,7 +8,7 @@ from ..models import (
     SampleParameter,
     Site,
     Unit,
-    SampleLocation,
+    SampleId,
     SampleResult,
     Well,
 )
@@ -37,7 +37,7 @@ def site_by_name(name):
     return render_template("sites.html", sites=sites)
 
 
-@main.route("/add_site", methods=["GET", "POST"])
+@main.route("/add-site", methods=["GET", "POST"])
 def add_site():
     form = SiteForm()
     if form.validate_on_submit():
@@ -60,7 +60,7 @@ def add_site():
     return render_template("edit_site.html", form=form)
 
 
-@main.route("/edit_site/<int:site_id>", methods=["GET", "POST"])
+@main.route("/edit-site/<int:site_id>", methods=["GET", "POST"])
 def edit_site_id(site_id):
     site = Site.query.get_or_404(site_id)
     form = SiteForm()
@@ -86,7 +86,7 @@ def edit_site_id(site_id):
     return render_template("edit_site.html", form=form)
 
 
-@main.route("/edit_site/<name>", methods=["GET", "POST"])
+@main.route("/edit-site/<name>", methods=["GET", "POST"])
 def edit_site_name(name):
     site = Site.query.filter(Site.name.ilike(name + "%")).first()
     form = SiteForm()
@@ -118,13 +118,13 @@ def units():
     return render_template("units.html", units=units)
 
 
-@main.route("/sample_locations")
-def sample_locations():
-    sample_locations = SampleLocation.query.all()
-    return render_template("sample_locations.html", sample_locations=sample_locations)
+@main.route("/sample-ids")
+def sample_ids():
+    sample_ids = SampleId.query.all()
+    return render_template("sample_ids.html", sample_ids=sample_ids)
 
 
-@main.route("/sample_results")
+@main.route("/sample-results")
 def sample_results():
     sample_results = SampleResult.query.all()
     return render_template("sample_results.html", sample_results=sample_results)

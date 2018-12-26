@@ -213,44 +213,42 @@ class Site(db.Model, BaseEntity):
         )
 
 
-class SampleLocation(db.Model, BaseEntity):
-    __tablename__ = "sample_location"
-    __table_args__ = (db.UniqueConstraint("location_id", "site_id"),)
+class SampleId(db.Model, BaseEntity):
+    __tablename__ = "sample_id"
+    __table_args__ = (db.UniqueConstraint("sample_id", "site_id"),)
 
-    location_id = db.Column(db.Text, primary_key=True)
+    sample_id = db.Column(db.Text, primary_key=True)
     site_id = db.Column(
         db.ForeignKey("site.site_id", ondelete="CASCADE", onupdate="CASCADE")
     )
-    location_type = db.Column(db.Text)
-    geometry = db.Column(Geometry("POINT", 4326))
-    coords = db.column_property(functions.ST_AsGeoJSON(geometry))
+    sample_type = db.Column(db.String(3), db.ForeignKey("medium_code.medium_cd"))
 
     site = db.relationship("Site")
+    medium = db.relationship("MediumCode")
 
     def __repr__(self):
-        return "<SampleLocation(location_id='%s', location_type='%s')>" % (
-            self.location_id,
-            self.location_type,
+        return "<SampleId(sample_id='%s', sample_type='%s')>" % (
+            self.sample_id,
+            self.sample_type,
         )
 
     def to_json(self):
         json_sample_location = {
-            "url": url_for("api.get_sample_location", location_id_id=self.location_id),
+            "url": url_for("api.get_sample_id", sample_id_id=self.sample_id),
             "site": self.site.site_name,
-            "location_id": self.location_id,
-            "location_type": self.location_type,
-            "geometry": json.loads(self.coords),
+            "sample_id": self.sample_id,
+            "sample_type": self.sample_type,
         }
-        return json_sample_location
+        return json_sample_id
 
     @staticmethod
     def from_json(json_sample_location):
         site = json_sample_location.get("site.site_name")
-        location_id = json_sample_location.get("location_id")
-        location_type = json_sample_location.get("sample_type")
+        sample_id = json_sample_location.get("sample_id")
+        sample_type = json_sample_location.get("sample_type")
         if location_id is None or location_id == "":
-            raise ValidationError("Sample Location does not have an ID")
-        return SampleLocation(location_id=location_id, location_type=location_type)
+            raise ValidationError("Sample does not have an ID")
+        return SampleLocation(sample_id=sample_id, sample_type=sample_type)
 
 
 class Unit(db.Model, BaseEntity):
@@ -280,15 +278,15 @@ class SampleResult(db.Model, BaseEntity):
     __tablename__ = "sample_result"
     __table_args__ = (
         db.UniqueConstraint(
-            "lab_id", "location_id", "sample_date", "param_cd", "analysis_result"
+            "lab_id", "sample_id", "sample_date", "param_cd", "analysis_result"
         ),
     )
 
     id = db.Column(db.Integer, primary_key=True)
     site_id = db.Column(db.ForeignKey("site.site_id"), nullable=False)
     lab_id = db.Column(db.Text)
-    location_id = db.Column(
-        db.ForeignKey("sample_location.location_id"), nullable=False
+    sample_id = db.Column(
+        db.ForeignKey("sample_id.sample_id"), nullable=False
     )
     param_cd = db.Column(db.ForeignKey("sample_parameter.param_cd"), nullable=False)
     sample_date = db.Column(db.Date, nullable=False)
@@ -307,7 +305,7 @@ class SampleResult(db.Model, BaseEntity):
     order_comment = db.Column(db.Text)
     analysis_comment = db.Column(db.Text)
 
-    location = db.relationship("SampleLocation")
+    sample = db.relationship("SampleId")
     medium_code = db.relationship("MediumCode")
     sample_parameter = db.relationship("SampleParameter")
     site = db.relationship("Site")
@@ -317,10 +315,14 @@ class Well(db.Model, BaseEntity):
     __tablename__ = "well"
 
     well_id = db.Column(db.Integer, primary_key=True)
-    location_id = db.Column(
-        db.Text, db.ForeignKey("sample_location.location_id"), nullable=False
+    sample_id = db.Column(
+        db.Text, db.ForeignKey("sample_id.sample_id"), nullable=False
     )
     boring_id = db.Column(db.Integer, db.ForeignKey("boring.boring_id"), nullable=False)
+    longitude = db.Column(db.Float, nullable=True)
+    latitude = db.Column(db.Float, nullable=True)
+    geometry = db.Column(Geometry(geometry_type="POINT", srid=4326))
+    medium_cd = db.Column(db.String(3), db.ForeignKey("sample_id.sample_type"), default="WG")
     install_date = db.Column(db.Date)
     top_riser = db.Column(db.Float)
     top_bent_seal = db.Column(db.Float)
@@ -339,4 +341,4 @@ class Well(db.Model, BaseEntity):
     notes = db.Column(db.Text)
 
     boring = db.relationship("Boring")
-    sample_location = db.relationship("SampleLocation")
+    sample = db.relationship("SampleId")
