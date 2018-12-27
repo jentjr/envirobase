@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Envirobase - Sites{% endblock %}
+{% block title %}Envirobase - Facilites{% endblock %}
 
 {% block page_content %}
 <table class="table">
@@ -19,18 +19,18 @@
 		</tr>
 	</thead>
 	<tbody>
-    {% for site in sites %}
+    {% for facility in facilites %}
 	<tr>
-	    <td>{{ site.site_id }}</td>
-		<td>{{ site.name }}</td>
-		<td>{{ site.address }}</td>
-		<td>{{ site.city }}</td>
-		<td>{{ site.state }}</td>
-		<td>{{ site.zipcode }}</td>
-		<td>{{ site.longitude }}</td>
-		<td>{{ site.latitude }}</td>
-		<td>{{ site.created_on }}</td>
-		<td>{{ site.updated_on }}</td>
+	    <td>{{ facility.facility_id }}</td>
+		<td>{{ facility.name }}</td>
+		<td>{{ facility.address }}</td>
+		<td>{{ facility.city }}</td>
+		<td>{{ facility.state }}</td>
+		<td>{{ facility.zipcode }}</td>
+		<td>{{ facility.longitude }}</td>
+		<td>{{ facility.latitude }}</td>
+		<td>{{ facility.created_on }}</td>
+		<td>{{ facility.updated_on }}</td>
 	</tr>
 	{% endfor %}
 	</tbody>

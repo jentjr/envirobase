@@ -25,12 +25,270 @@ class BaseEntity(object):
     updated_on = db.Column(db.DateTime)
 
 
+class Facility(db.Model, BaseEntity):
+    __tablename__ = "facility"
+
+    facility_id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Text, nullable=False, unique=True)
+    address = db.Column(db.Text)
+    city = db.Column(db.Text)
+    state = db.Column(db.CHAR(2))
+    zipcode = db.Column(db.String)
+    longitude = db.Column(db.Float, nullable=True)
+    latitude = db.Column(db.Float, nullable=True)
+    geometry = db.Column(Geometry(geometry_type="POINT", srid=4326))
+
+    def __repr__(self):
+        return (
+            "<Facility(name='%s', address='%s', city='%s', state='%s', zipcode='%s', longitude='%s', latitude='%s')>"
+            % (
+                self.name,
+                self.address,
+                self.city,
+                self.state,
+                self.zipcode,
+                self.longitude,
+                self.latitude,
+            )
+        )
+
+    @classmethod
+    def add_facility(cls, name, address, city, state, zipcode, longitude, latitude):
+        """Add a new facility in the database."""
+
+        geometry = "POINT({} {})".format(longitude, latitude)
+        facility = Facility(
+            name=name,
+            address=address,
+            city=city,
+            state=state,
+            zipcode=zipcode,
+            longitude=longitude,
+            latitude=latitude,
+            geometry=geometry,
+        )
+
+        db.session.add(facility)
+        db.session.commit()
+
+    @classmethod
+    def update_geometries(cls):
+        """Using each facility's longitude and latitude, add geometry data to db."""
+
+        facilities = Facility.query.all()
+
+        for facility in facilities:
+            point = "POINT({} {})".format(facility.longitude, facility.latitude)
+            facility.geometry = point
+
+        db.session.commit()
+
+    def to_json(self):
+        json_facility = {
+            "url": url_for("api.get_facility", facility_id=self.facility_id),
+            "name": self.name,
+            "address": self.address,
+            "city": self.city,
+            "state": self.state,
+            "zipcode": self.zipcode,
+            "longitude": self.longitude,
+            "latitude": self.latitude,
+        }
+        return json_facility
+
+    @staticmethod
+    def from_json(json_facility):
+        name = json_facility.get("name")
+        address = json_facility.get("address")
+        city = json_facility.get("city")
+        state = json_facility.get("state")
+        zipcode = json_facility.get("zipcode")
+        longitude = json_facility.get("longitude")
+        latitude = json_facility.get("latitude")
+        if name is None or name == "":
+            raise ValidationError("Facility must have a name")
+        return Facility(
+            name=name,
+            address=address,
+            city=city,
+            state=state,
+            zipcode=zipcode,
+            longitude=longitude,
+            latitude=latitude,
+        )
+
+
+class Landfill(db.Model, BaseEntity):
+    __tablename__ = "landfill"
+
+    landfill_id = db.Column(db.Integer, primary_key=True)
+    facility_id = db.Column(db.ForeignKey("facility.facility_id"))
+    name = db.Column(db.Text, nullable=False, unique=True)
+    geometry = db.Column(Geometry(geometry_type="POLYGON", srid=4326))
+
+    facility = db.relationship("Facility")
+
+    def __repr__(self):
+        return "<Landfill(name='%s')>" % (self.name)
+
+    def to_json(self):
+        json_landfill = {
+            "url": url_for("api.get_landfill", landfill_id=self.landfill_id),
+            "name": self.name,
+            # "geometry": json.loads(self.coords),
+        }
+        return json_landfill
+
+
+class Impoundment(db.Model, BaseEntity):
+    __tablename__ = "impoundment"
+
+    impoundment_id = db.Column(db.Integer, primary_key=True)
+    facility_id = db.Column(db.ForeignKey("facility.facility_id"))
+    name = db.Column(db.Text, nullable=False, unique=True)
+    constructed_date = db.Column(db.Date)
+    geometry = db.Column(Geometry(geometry_type="POLYGON", srid=4326))
+    hazard_class = db.Column(db.Text)
+
+    facility = db.relationship("Facility")
+
+    def __repr__(self):
+        return "<Impoundment(name='%s')>" % (self.name)
+
+    def to_json(self):
+        json_impoundment = {
+            "url": url_for("api.get_impoundment", impoundment_id=self.impoundment_id),
+            "name": self.name,
+            # "geometry": json.loads(self.coords),
+        }
+        return json_impoundment
+
+
+class UndergroundStorageTank(db.Model, BaseEntity):
+    __tablename__ = "underground_storage_tank"
+
+    tank_id = db.Column(db.Integer, primary_key=True)
+    facility_id = db.Column(db.ForeignKey("facility.facility_id"))
+    capacity = db.Column(db.Integer)
+    stored_substance = db.Column(db.Text)
+    status = db.Column(db.Text)
+    longitude = db.Column(db.Float)
+    latitude = db.Column(db.Float)
+    geometry = db.Column(Geometry(geometry_type="POINT", srid=4326))
+
+    facility = db.relationship("Facility")
+
+    def __repr__(self):
+        return (
+            "<UndergroundStorageTank(tank_id='%s', stored_substance='%s', status='%s')>"
+            % (self.tank_id, self.stored_substance, self.status)
+        )
+
+    def to_json(self):
+        json_ust = {
+            "url": url_for("api.get_ust", tank_id=self.tank_id),
+            "capacity": self.capacity,
+            "stored_substance": self.stored_substance
+            # "geometry": json.loads(self.coords),
+        }
+        return json_ust
+
+
+class AbovegroundStorageTank(db.Model, BaseEntity):
+    __tablename__ = "aboveground_storage_tank"
+
+    tank_id = db.Column(db.Integer, primary_key=True)
+    facility_id = db.Column(db.ForeignKey("facility.facility_id"))
+    capacity = db.Column(db.Integer)
+    stored_substance = db.Column(db.Text)
+    status = db.Column(db.Text)
+    longitude = db.Column(db.Float)
+    latitude = db.Column(db.Float)
+    geometry = db.Column(Geometry(geometry_type="POINT", srid=4326))
+
+    facility = db.relationship("Facility")
+
+    def __repr__(self):
+        return (
+            "<AbovegroundStorageTank(tank_id='%s', stored_substance='%s', status='%s')>"
+            % (self.tank_id, self.stored_substance, self.status)
+        )
+
+    def to_json(self):
+        json_ast = {
+            "url": url_for("api.get_ast", tank_id=self.tank_id),
+            "capacity": self.capacity,
+            "stored_substance": self.stored_substance
+            # "geometry": json.loads(self.coords),
+        }
+        return json_ast
+
+
 class Boring(db.Model, BaseEntity):
     __tablename__ = "boring"
 
     boring_id = db.Column(db.Integer, primary_key=True)
     start_date = db.Column(db.Date)
     end_date = db.Column(db.Date)
+
+
+class Well(db.Model, BaseEntity):
+    __tablename__ = "well"
+
+    well_id = db.Column(db.Integer, primary_key=True)
+    sample_id = db.Column(db.Text, db.ForeignKey("sample_id.sample_id"), nullable=False)
+    boring_id = db.Column(db.Integer, db.ForeignKey("boring.boring_id"), nullable=False)
+    longitude = db.Column(db.Float, nullable=True)
+    latitude = db.Column(db.Float, nullable=True)
+    geometry = db.Column(Geometry(geometry_type="POINT", srid=4326))
+    medium_cd = db.Column(
+        db.String(3), db.ForeignKey("sample_id.sample_type"), default="WG"
+    )
+    installation_date = db.Column(db.Date)
+    abandoned_date = dbColumn(db.Date)
+    top_riser = db.Column(db.Float)
+    top_bent_seal = db.Column(db.Float)
+    top_gravel_pack = db.Column(db.Float)
+    top_screen = db.Column(db.Float)
+    bottom_screen = db.Column(db.Float)
+    bottom_well = db.Column(db.Float)
+    bottom_gravel_pack = db.Column(db.Float)
+    bottom_boring = db.Column(db.Float)
+    grout_seal_desc = db.Column(db.Text)
+    bent_seal_desc = db.Column(db.Text)
+    screen_type = db.Column(db.Text)
+    gravel_pack_desc = db.Column(db.Text)
+    riser_pipe_desc = db.Column(db.Text)
+    spacer_depths = db.Column(db.Text)
+    notes = db.Column(db.Text)
+
+    boring = db.relationship("Boring")
+
+
+class Piezometer(db.Model, BaseEntity):
+    __tablename__ = "piezometer"
+
+    piezometer_id = db.Column(db.Integer, primary_key=True)
+    boring_id = db.Column(db.Integer, db.ForeignKey("boring.boring_id"), nullable=False)
+    longitude = db.Column(db.Float, nullable=True)
+    latitude = db.Column(db.Float, nullable=True)
+    geometry = db.Column(Geometry(geometry_type="POINT", srid=4326))
+    installation_date = db.Column(db.Date)
+    abandoned_date = dbColumn(db.Date)
+    top_riser = db.Column(db.Float)
+    top_bent_seal = db.Column(db.Float)
+    top_gravel_pack = db.Column(db.Float)
+    bottom_pizeometer = db.Column(db.Float)
+    bottom_boring = db.Column(db.Float)
+    grout_seal_desc = db.Column(db.Text)
+    bent_seal_desc = db.Column(db.Text)
+    screen_type = db.Column(db.Text)
+    gravel_pack_desc = db.Column(db.Text)
+    riser_pipe_desc = db.Column(db.Text)
+    spacer_depths = db.Column(db.Text)
+    notes = db.Column(db.Text)
+
+    boring = db.relationship("Boring")
 
 
 class MediumCode(db.Model, BaseEntity):
@@ -120,99 +378,6 @@ class SampleParameter(db.Model, BaseEntity):
             )
 
 
-class Site(db.Model, BaseEntity):
-    __tablename__ = "site"
-
-    site_id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Text, nullable=False, unique=True)
-    address = db.Column(db.Text)
-    city = db.Column(db.Text)
-    state = db.Column(db.CHAR(2))
-    zipcode = db.Column(db.String)
-    longitude = db.Column(db.Float, nullable=True)
-    latitude = db.Column(db.Float, nullable=True)
-    geometry = db.Column(Geometry(geometry_type="POINT", srid=4326))
-
-    def __repr__(self):
-        return (
-            "<Site(ame='%s', address='%s', city='%s', state='%s', zipcode='%s', longitude='%s', latitude='%s')>"
-            % (
-                self.name,
-                self.address,
-                self.city,
-                self.state,
-                self.zipcode,
-                self.longitude,
-                self.latitude,
-            )
-        )
-
-    @classmethod
-    def add_site(cls, name, address, city, state, zipcode, longitude, latitude):
-        """Add a new site in the database."""
-
-        geometry = "POINT({} {})".format(longitude, latitude)
-        site = Site(
-            name=name,
-            address=address,
-            city=city,
-            state=state,
-            zipcode=zipcode,
-            longitude=longitude,
-            latitude=latitude,
-            geometry=geometry,
-        )
-
-        db.session.add(site)
-        db.session.commit()
-
-    @classmethod
-    def update_geometries(cls):
-        """Using each site's longitude and latitude, add geometry data to db."""
-
-        sites = Site.query.all()
-
-        for site in sites:
-            point = "POINT({} {})".format(site.longitude, site.latitude)
-            site.geometry = point
-
-        db.session.commit()
-
-    def to_json(self):
-        json_site = {
-            "url": url_for("api.get_site", site_id=self.site_id),
-            "name": self.name,
-            "address": self.address,
-            "city": self.city,
-            "state": self.state,
-            "zipcode": self.zipcode,
-            "longitude": self.longitude,
-            "latitude": self.latitude,
-        }
-        return json_site
-
-    @staticmethod
-    def from_json(json_site):
-        name = json_site.get("name")
-        address = json_site.get("address")
-        city = json_site.get("city")
-        state = json_site.get("state")
-        zipcode = json_site.get("zipcode")
-        longitude = json_site.get("longitude")
-        latitude = json_site.get("latitude")
-        if name is None or name == "":
-            raise ValidationError("Site must have a name")
-        return Site(
-            name=name,
-            address=address,
-            city=city,
-            state=state,
-            zipcode=zipcode,
-            longitude=longitude,
-            latitude=latitude,
-        )
-
-
 class SampleId(db.Model, BaseEntity):
     __tablename__ = "sample_id"
     __table_args__ = (db.UniqueConstraint("sample_id", "site_id"),)
@@ -251,29 +416,6 @@ class SampleId(db.Model, BaseEntity):
         return SampleLocation(sample_id=sample_id, sample_type=sample_type)
 
 
-class Unit(db.Model, BaseEntity):
-    __tablename__ = "unit"
-
-    unit_id = db.Column(db.Integer, primary_key=True)
-    site_id = db.Column(db.ForeignKey("site.site_id"))
-    unit_name = db.Column(db.Text, nullable=False, unique=True)
-    geometry = db.Column(Geometry("POLYGON", 4326))
-    coords = db.column_property(functions.ST_AsGeoJSON(geometry))
-
-    site = db.relationship("Site")
-
-    def __repr__(self):
-        return "<Unit(unit_name='%s')>" % (self.unit_name)
-
-    def to_json(self):
-        json_unit = {
-            "url": url_for("api.get_unit", unit_id=self.unit_id),
-            "unit_name": self.unit_name,
-            # "geometry": json.loads(self.coords),
-        }
-        return json_unit
-
-
 class SampleResult(db.Model, BaseEntity):
     __tablename__ = "sample_result"
     __table_args__ = (
@@ -285,9 +427,7 @@ class SampleResult(db.Model, BaseEntity):
     id = db.Column(db.Integer, primary_key=True)
     site_id = db.Column(db.ForeignKey("site.site_id"), nullable=False)
     lab_id = db.Column(db.Text)
-    sample_id = db.Column(
-        db.ForeignKey("sample_id.sample_id"), nullable=False
-    )
+    sample_id = db.Column(db.ForeignKey("sample_id.sample_id"), nullable=False)
     param_cd = db.Column(db.ForeignKey("sample_parameter.param_cd"), nullable=False)
     sample_date = db.Column(db.Date, nullable=False)
     sample_time = db.Column(db.Time, nullable=True)
@@ -309,36 +449,3 @@ class SampleResult(db.Model, BaseEntity):
     medium_code = db.relationship("MediumCode")
     sample_parameter = db.relationship("SampleParameter")
     site = db.relationship("Site")
-
-
-class Well(db.Model, BaseEntity):
-    __tablename__ = "well"
-
-    well_id = db.Column(db.Integer, primary_key=True)
-    sample_id = db.Column(
-        db.Text, db.ForeignKey("sample_id.sample_id"), nullable=False
-    )
-    boring_id = db.Column(db.Integer, db.ForeignKey("boring.boring_id"), nullable=False)
-    longitude = db.Column(db.Float, nullable=True)
-    latitude = db.Column(db.Float, nullable=True)
-    geometry = db.Column(Geometry(geometry_type="POINT", srid=4326))
-    medium_cd = db.Column(db.String(3), db.ForeignKey("sample_id.sample_type"), default="WG")
-    install_date = db.Column(db.Date)
-    top_riser = db.Column(db.Float)
-    top_bent_seal = db.Column(db.Float)
-    top_gravel_pack = db.Column(db.Float)
-    top_screen = db.Column(db.Float)
-    bottom_screen = db.Column(db.Float)
-    bottom_well = db.Column(db.Float)
-    bottom_gravel_pack = db.Column(db.Float)
-    bottom_boring = db.Column(db.Float)
-    grout_seal_desc = db.Column(db.Text)
-    bent_seal_desc = db.Column(db.Text)
-    screen_type = db.Column(db.Text)
-    gravel_pack_desc = db.Column(db.Text)
-    riser_pipe_desc = db.Column(db.Text)
-    spacer_depths = db.Column(db.Text)
-    notes = db.Column(db.Text)
-
-    boring = db.relationship("Boring")
-    sample = db.relationship("SampleId")
