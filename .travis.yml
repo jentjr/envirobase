@@ -1,3 +1,13 @@
+sudo: required
+dist: xenial
+language: python
+python:
+  - 3.6
+  - 3.7
+env:
+  global:
+    - PIPENV_VENV_IN_PROJECT=1
+    - PIPENV_IGNORE_VIRTUALENVS=1
 addons:
   postgresql: 9.6
   apt:
@@ -5,6 +15,12 @@ addons:
     - postgresql-9.6-postgis-2.3
 before_script:
   - psql -U postgres -c "create extension postgis"
+  - export FLASK_APP="$TRAVIS_BUILD_DIR/envirobase"
+  - export FLASK_DEBUG=1
 
 services:
   - postgresql
+
+install: make setup
+
+script: make test

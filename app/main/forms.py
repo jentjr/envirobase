@@ -1,10 +1,10 @@
-from ..models import Site
+from ..models import Facility
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired, Optional, Length
 
 
-class SiteForm(FlaskForm):
+class FacilityForm(FlaskForm):
     name = StringField("Name of Site", validators=[DataRequired()])
     address = StringField(
         "Address",

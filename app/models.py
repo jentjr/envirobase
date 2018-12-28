@@ -39,18 +39,7 @@ class Facility(db.Model, BaseEntity):
     geometry = db.Column(Geometry(geometry_type="POINT", srid=4326))
 
     def __repr__(self):
-        return (
-            "<Facility(name='%s', address='%s', city='%s', state='%s', zipcode='%s', longitude='%s', latitude='%s')>"
-            % (
-                self.name,
-                self.address,
-                self.city,
-                self.state,
-                self.zipcode,
-                self.longitude,
-                self.latitude,
-            )
-        )
+        return f"Facility('{self.name}', '{self.address}', '{self.city}','{self.state}', '{self.zipcode}', '{self.longitude}', '{self.latitude}')"
 
     @classmethod
     def add_facility(cls, name, address, city, state, zipcode, longitude, latitude):
@@ -129,7 +118,7 @@ class Landfill(db.Model, BaseEntity):
     facility = db.relationship("Facility")
 
     def __repr__(self):
-        return "<Landfill(name='%s')>" % (self.name)
+        return f"Landfill('{self.name}')"
 
     def to_json(self):
         json_landfill = {
@@ -164,25 +153,38 @@ class Impoundment(db.Model, BaseEntity):
         return json_impoundment
 
 
-class UndergroundStorageTank(db.Model, BaseEntity):
-    __tablename__ = "underground_storage_tank"
+class StorageTank(db.Model, BaseEntity):
+    __tablename__ = "storage_tank"
 
     tank_id = db.Column(db.Integer, primary_key=True)
-    facility_id = db.Column(db.ForeignKey("facility.facility_id"))
+    facility_id = db.Column(db.Integer, db.ForeignKey("facility.facility_id"))
     capacity = db.Column(db.Integer)
-    stored_substance = db.Column(db.Text)
-    status = db.Column(db.Text)
+    stored_substance = db.Column(db.String(64))
+    status = db.Column(db.String(10))
     longitude = db.Column(db.Float)
     latitude = db.Column(db.Float)
     geometry = db.Column(Geometry(geometry_type="POINT", srid=4326))
+    tank_type = db.Column(db.String(24))
 
     facility = db.relationship("Facility")
 
+    __mapper_args__ = {
+        "polymorphic_identity": "storage_tank",
+        "polymorphic_on": tank_type,
+    }
+
+
+class UndergroundStorageTank(StorageTank):
+    __tablename__ = "underground_storage_tank"
+
+    tank_id = db.Column(
+        db.Integer, db.ForeignKey("storage_tank.tank_id"), primary_key=True
+    )
+
+    __mapper_args__ = {"polymorphic_identity": "underground_storage_tank"}
+
     def __repr__(self):
-        return (
-            "<UndergroundStorageTank(tank_id='%s', stored_substance='%s', status='%s')>"
-            % (self.tank_id, self.stored_substance, self.status)
-        )
+        return f"UndergroundStorageTank('{self.tank_id}', '{self.tank_type}', '{self.stored_substance}', '{self.status}')"
 
     def to_json(self):
         json_ust = {
@@ -194,25 +196,17 @@ class UndergroundStorageTank(db.Model, BaseEntity):
         return json_ust
 
 
-class AbovegroundStorageTank(db.Model, BaseEntity):
+class AbovegroundStorageTank(StorageTank):
     __tablename__ = "aboveground_storage_tank"
 
-    tank_id = db.Column(db.Integer, primary_key=True)
-    facility_id = db.Column(db.ForeignKey("facility.facility_id"))
-    capacity = db.Column(db.Integer)
-    stored_substance = db.Column(db.Text)
-    status = db.Column(db.Text)
-    longitude = db.Column(db.Float)
-    latitude = db.Column(db.Float)
-    geometry = db.Column(Geometry(geometry_type="POINT", srid=4326))
+    tank_id = db.Column(
+        db.Integer, db.ForeignKey("storage_tank.tank_id"), primary_key=True
+    )
 
-    facility = db.relationship("Facility")
+    __mapper_args__ = {"polymorphic_identity": "aboveground_storage_tank"}
 
     def __repr__(self):
-        return (
-            "<AbovegroundStorageTank(tank_id='%s', stored_substance='%s', status='%s')>"
-            % (self.tank_id, self.stored_substance, self.status)
-        )
+        return f"AbovegroundStorageTank('{self.tank_id}', '{self.tank_type}', '{self.stored_substance}', '{self.status}')"
 
     def to_json(self):
         json_ast = {
@@ -222,6 +216,44 @@ class AbovegroundStorageTank(db.Model, BaseEntity):
             # "geometry": json.loads(self.coords),
         }
         return json_ast
+
+
+class SampleId(db.Model, BaseEntity):
+    __tablename__ = "sample_id"
+    __table_args__ = (db.UniqueConstraint("sample_id", "facility_id"),)
+
+    sample_id = db.Column(db.String(64), primary_key=True)
+    facility_id = db.Column(
+        db.ForeignKey("facility.facility_id", ondelete="CASCADE", onupdate="CASCADE")
+    )
+    sample_type = db.Column(db.String(3), db.ForeignKey("medium_code.medium_cd"))
+
+    facility = db.relationship("Facility")
+    medium = db.relationship("MediumCode")
+
+    def __repr__(self):
+        return "<SampleId(sample_id='%s', sample_type='%s')>" % (
+            self.sample_id,
+            self.sample_type,
+        )
+
+    def to_json(self):
+        json_sample_location = {
+            "url": url_for("api.get_sample_id", sample_id_id=self.sample_id),
+            "facility": self.facility.name,
+            "sample_id": self.sample_id,
+            "sample_type": self.sample_type,
+        }
+        return json_sample_id
+
+    @staticmethod
+    def from_json(json_sample_location):
+        facility = json_sample_location.get("facility.name")
+        sample_id = json_sample_location.get("sample_id")
+        sample_type = json_sample_location.get("sample_type")
+        if location_id is None or location_id == "":
+            raise ValidationError("Sample does not have an ID")
+        return SampleLocation(sample_id=sample_id, sample_type=sample_type)
 
 
 class Boring(db.Model, BaseEntity):
@@ -245,7 +277,7 @@ class Well(db.Model, BaseEntity):
         db.String(3), db.ForeignKey("sample_id.sample_type"), default="WG"
     )
     installation_date = db.Column(db.Date)
-    abandoned_date = dbColumn(db.Date)
+    abandoned_date = db.Column(db.Date)
     top_riser = db.Column(db.Float)
     top_bent_seal = db.Column(db.Float)
     top_gravel_pack = db.Column(db.Float)
@@ -274,7 +306,7 @@ class Piezometer(db.Model, BaseEntity):
     latitude = db.Column(db.Float, nullable=True)
     geometry = db.Column(Geometry(geometry_type="POINT", srid=4326))
     installation_date = db.Column(db.Date)
-    abandoned_date = dbColumn(db.Date)
+    abandoned_date = db.Column(db.Date)
     top_riser = db.Column(db.Float)
     top_bent_seal = db.Column(db.Float)
     top_gravel_pack = db.Column(db.Float)
@@ -378,44 +410,6 @@ class SampleParameter(db.Model, BaseEntity):
             )
 
 
-class SampleId(db.Model, BaseEntity):
-    __tablename__ = "sample_id"
-    __table_args__ = (db.UniqueConstraint("sample_id", "site_id"),)
-
-    sample_id = db.Column(db.Text, primary_key=True)
-    site_id = db.Column(
-        db.ForeignKey("site.site_id", ondelete="CASCADE", onupdate="CASCADE")
-    )
-    sample_type = db.Column(db.String(3), db.ForeignKey("medium_code.medium_cd"))
-
-    site = db.relationship("Site")
-    medium = db.relationship("MediumCode")
-
-    def __repr__(self):
-        return "<SampleId(sample_id='%s', sample_type='%s')>" % (
-            self.sample_id,
-            self.sample_type,
-        )
-
-    def to_json(self):
-        json_sample_location = {
-            "url": url_for("api.get_sample_id", sample_id_id=self.sample_id),
-            "site": self.site.site_name,
-            "sample_id": self.sample_id,
-            "sample_type": self.sample_type,
-        }
-        return json_sample_id
-
-    @staticmethod
-    def from_json(json_sample_location):
-        site = json_sample_location.get("site.site_name")
-        sample_id = json_sample_location.get("sample_id")
-        sample_type = json_sample_location.get("sample_type")
-        if location_id is None or location_id == "":
-            raise ValidationError("Sample does not have an ID")
-        return SampleLocation(sample_id=sample_id, sample_type=sample_type)
-
-
 class SampleResult(db.Model, BaseEntity):
     __tablename__ = "sample_result"
     __table_args__ = (
@@ -425,7 +419,7 @@ class SampleResult(db.Model, BaseEntity):
     )
 
     id = db.Column(db.Integer, primary_key=True)
-    site_id = db.Column(db.ForeignKey("site.site_id"), nullable=False)
+    site_id = db.Column(db.ForeignKey("facility.facility_id"), nullable=False)
     lab_id = db.Column(db.Text)
     sample_id = db.Column(db.ForeignKey("sample_id.sample_id"), nullable=False)
     param_cd = db.Column(db.ForeignKey("sample_parameter.param_cd"), nullable=False)
@@ -448,4 +442,4 @@ class SampleResult(db.Model, BaseEntity):
     sample = db.relationship("SampleId")
     medium_code = db.relationship("MediumCode")
     sample_parameter = db.relationship("SampleParameter")
-    site = db.relationship("Site")
+    facility = db.relationship("Facility")

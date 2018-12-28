@@ -1,7 +1,7 @@
 from flask import render_template, url_for, redirect, current_app, flash
 from . import main
 from .. import db
-from .forms import SiteForm
+from .forms import FacilityForm
 from ..models import (
     Boring,
     MediumCode,
@@ -10,7 +10,7 @@ from ..models import (
     Landfill,
     Impoundment,
     UndergroundStorageTank,
-    AbovegroundStoragetank,
+    AbovegroundStorageTank,
     SampleId,
     SampleResult,
     Well,

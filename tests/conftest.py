@@ -1,7 +1,7 @@
 import os
 import pytest
 from app import create_app, db
-from app.models import Site
+from app.models import Facility
 
 
 @pytest.fixture(scope="module")
@@ -27,24 +27,26 @@ def init_database():
     db.create_all()
 
     # Insert Site data
-    site1 = Site(
-        site_name="test site 1",
+    facility1 = Facility(
+        name="test site 1",
         address="1234 test rd.",
         city="Test",
         state="OH",
         zipcode="12345",
-        site_geog="POINT(-80.0, 40.0)",
+        longitude=-80.0,
+        latitude=40.0,
     )
-    site2 = Site(
-        site_name="test site 2",
+    facility2 = Facility(
+        name="test site 2",
         address="1234 pytest rd.",
         city="Test",
         state="IN",
         zipcode="12345",
-        site_geog="POINT(-81.0, 41.0)",
+        longitude=-81.0,
+        latitude=41.0,
     )
-    db.session.add(site1)
-    db.session.add(site2)
+    db.session.add(facility1)
+    db.session.add(facility2)
 
     # Commit the changes for the users
     db.session.commit()
@@ -55,13 +57,14 @@ def init_database():
 
 
 @pytest.fixture(scope="module")
-def new_site():
-    site = Site(
-        site_name="test site",
+def new_facility():
+    facility = Facility(
+        name="test site",
         address="1234 test rd.",
         city="Test",
         state="OH",
         zipcode="12345",
-        site_geog="POINT(-80.0, 40.0)",
+        longitude=-80.0,
+        latitude=40.0,
     )
-    return site
+    return facility
