@@ -1,5 +1,5 @@
 """
-This file (test_sites.py contains the functional tests for the sites blueprint
+This file (test_facilites.py contains the functional tests for the facilities blueprint
 """
 
 

@@ -15,7 +15,7 @@ from ..models import (
     AbovegroundStorageTank,
     SampleId,
     SampleResult,
-    Well,
+    MonitoringWell,
 )
 
 
@@ -183,10 +183,14 @@ def parameters():
 
 @main.route("/parameters/<search_description>", methods=["GET"])
 def parameters_search(search_description):
-    parameters = SampleParameter.query.filter(
+    page = request.args.get("page", 1, type=int)
+    pagination = SampleParameter.query.filter(
         SampleParameter.description.ilike("%" + search_description + "%")
-    ).all()
-    return render_template("parameters.html", parameters=parameters)
+    ).paginate(
+        page, per_page=current_app.config["ENVIROBASE_PER_PAGE"], error_out=False
+    )
+    parameters = pagination.items
+    return render_template("parameters.html", parameters=parameters, pagination=pagination)
 
 
 @main.route("/mediums")
@@ -201,7 +205,11 @@ def mediums():
 
 @main.route("/mediums/<search_description>", methods=["GET"])
 def mediums_search(search_description):
-    mediums = MediumCode.query.filter(
+    page = request.args.get("page", 1, type=int)
+    pagination = MediumCode.query.filter(
         MediumCode.medium_name.ilike("%" + search_description + "%")
-    ).all()
-    return render_template("mediums.html", mediums=mediums)
+    ).paginate(
+        page, per_page=current_app.config["ENVIROBASE_PER_PAGE"], error_out=False
+    )
+    mediums = pagination.items
+    return render_template("mediums.html", mediums=mediums, pagination=pagination)

@@ -314,16 +314,15 @@ class SampleParameter(db.Model, BaseEntity):
 class SampleId(db.Model, BaseEntity):
     __tablename__ = "sample_id"
 
-    sample_id = db.Column(db.String(64), primary_key=True, unique=True)
+    sample_id = db.Column(db.Integer, primary_key=True, unique=True)
     facility_id = db.Column(db.ForeignKey("facility.facility_id"))
-    sample_type = db.Column(db.String(3), db.ForeignKey("medium_code.medium_cd"))
+    sample_type = db.Column(db.String(24))
 
     facility = db.relationship("Facility")
-    medium = db.relationship("MediumCode")
 
     __mapper_args__ = {
         "polymorphic_identity": "sample_id",
-        "polymorphic_on": sample_type,
+        "polymorphic_on": sample_type
     }
 
     def __repr__(self):
@@ -359,18 +358,17 @@ class Boring(db.Model, BaseEntity):
     end_date = db.Column(db.Date)
 
 
-class Well(db.Model, BaseEntity):
-    __tablename__ = "well"
-
+class MonitoringWell(SampleId, BaseEntity):
+    __tablename__ = "monitoring_well"
+    
+    sample_id = db.Column(
+        db.Integer, db.ForeignKey("sample_id.sample_id"), primary_key=True
+    )
     well_id = db.Column(db.Integer, primary_key=True)
-    sample_id = db.Column(db.Text, db.ForeignKey("sample_id.sample_id"), nullable=False)
     boring_id = db.Column(db.Integer, db.ForeignKey("boring.boring_id"), nullable=False)
     longitude = db.Column(db.Float, nullable=True)
     latitude = db.Column(db.Float, nullable=True)
     geometry = db.Column(Geometry(geometry_type="POINT", srid=4326))
-    medium_cd = db.Column(
-        db.String(3), db.ForeignKey("medium_code.medium_cd"), default="WG"
-    )
     installation_date = db.Column(db.Date)
     abandoned_date = db.Column(db.Date)
     top_riser = db.Column(db.Float)
@@ -390,11 +388,15 @@ class Well(db.Model, BaseEntity):
     notes = db.Column(db.Text)
 
     boring = db.relationship("Boring")
+    
+    __mapper_args__ = {"polymorphic_identity": "monitoring_well"}
 
-
-class Piezometer(db.Model, BaseEntity):
+class Piezometer(SampleId, BaseEntity):
     __tablename__ = "piezometer"
 
+    sample_id = db.Column(
+        db.Integer, db.ForeignKey("sample_id.sample_id"), primary_key=True
+    )
     piezometer_id = db.Column(db.Integer, primary_key=True)
     boring_id = db.Column(db.Integer, db.ForeignKey("boring.boring_id"), nullable=False)
     longitude = db.Column(db.Float, nullable=True)
@@ -416,7 +418,8 @@ class Piezometer(db.Model, BaseEntity):
     notes = db.Column(db.Text)
 
     boring = db.relationship("Boring")
-
+    
+    __mapper_args__ = {"polymorphic_identity": "piezometer"}
 
 class SampleResult(db.Model, BaseEntity):
     __tablename__ = "sample_result"
