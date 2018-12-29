@@ -16,6 +16,7 @@ flask-migrate = "*"
 flask-wtf = "*"
 wtforms = "*"
 pytest = "*"
+pandas = "*"
 
 [requires]
 python_version = "3.6"

@@ -28,4 +28,4 @@ before_script:
 
 install: make setup
 
-script: python -m pytest tests
+script: make test

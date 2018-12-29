@@ -18,6 +18,6 @@ activate:
 	pipenv shell -c
 
 test:
-	pipenv run -- pytest tests
+	pipenv run python -m pytest tests
 
 .PHONY: help activate test
