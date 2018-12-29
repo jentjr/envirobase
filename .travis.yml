@@ -17,10 +17,12 @@ before_script:
   - psql -U postgres -c "create extension postgis"
   - export FLASK_APP="$TRAVIS_BUILD_DIR/envirobase"
   - export FLASK_DEBUG=1
+  - export FLASK_ENV=testing
+  - export TEST_DATABASE_URL=postgresql://postgres:@localhost/envirobase
 
 services:
   - postgresql
 
 install: make setup
 
-script: make test
+script: python -m pytest tests
