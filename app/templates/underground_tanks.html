@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Envirobase - USTs{% endblock %}
+
+{% block page_content %}
+<table class="table">
+	<thead class="thead-dark">
+		<tr>
+		    <th scope="col">Tank</th>
+		    <th scope="col">Facility</th>
+			<th scope="col">Capacity</th>
+			<th scope="col">Stored Substance</th>
+			<th scope="col">Status</th>
+			<th scope="col">Created On</th>
+			<th scope="col">Last Updated</th>
+		</tr>
+	</thead>
+	<tbody>
+    {% for underground_tank in underground_tanks %}
+	<tr>
+	    <td>{{ underground_tank.tank_id }}</td>
+	    <td>{{ underground_tank.facility.name }}</td>
+		<td>{{ underground_tank.capacity }}</td>
+		<td>{{ underground_tank.stored_substance }}</td>
+		<td>{{ underground_tank.status }}</td>
+		<td>{{ underground_tank.created_on }}</td>
+		<td>{{ underground_tank.updated_on }}</td>
+	</tr>
+	{% endfor %}
+	</tbody>
+</table>
+{% endblock %}

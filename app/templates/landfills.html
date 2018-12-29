@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Envirobase - Landfills{% endblock %}
+
+{% block page_content %}
+<table class="table">
+	<thead class="thead-dark">
+		<tr>
+		    <th scope="col">ID</th>
+			<th scope="col">Facility</th>
+			<th scope="col">Landfill</th>
+			<th scope="col">Created On</th>
+			<th scope="col">Last Updated</th>
+		</tr>
+	</thead>
+	<tbody>
+    {% for landfill in landfills %}
+	<tr>
+	    <td>{{ landfill.unit_id }}</td>
+		<td>{{ landfill.facility.name }}</td>
+		<td>{{ landfill.name }}</td>
+		<td>{{ landfill.created_on }}</td>
+		<td>{{ landfill.updated_on }}</td>
+	</tr>
+	{% endfor %}
+	</tbody>
+</table>
+{% endblock %}

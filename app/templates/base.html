@@ -25,15 +25,32 @@
 		    <li class="dropdown"> 
 		      <a class="dropdown-toggle" data-toggle="dropdown">Facilities<b class="caret"></b>
 		      <ul class="dropdown-menu">
-		        <li><a class="dropdown-item" href="{{ url_for('main.facilities') }}">View Sites</a></li>
-		        <li><a class="dropdown-item" href="{{ url_for('main.add_facility') }}">Add Site</a></li>
+		        <li><a class="dropdown-item" href="{{ url_for('main.facilities') }}">View Facilities</a></li>
+		        <li><a class="dropdown-item" href="{{ url_for('main.add_facility') }}">Add Facility</a></li>
+		      </ul>
+            </li>
+		   </ul>
+            <ul class="nav navbar-nav">
+		    <li class="dropdown"> 
+		      <a class="dropdown-toggle" data-toggle="dropdown">Storage Tanks<b class="caret"></b>
+		      <ul class="dropdown-menu">
+		        <li><a class="dropdown-item" href="{{ url_for('main.storage_tanks') }}">All Tanks</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('main.underground_tanks') }}">USTs</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('main.aboveground_tanks') }}">ASTs</a></li>
+		      </ul>
+            </li>
+		   </ul>
+		   <ul class="nav navbar-nav">
+		    <li class="dropdown"> 
+		      <a class="dropdown-toggle" data-toggle="dropdown">Waste Units<b class="caret"></b>
+		      <ul class="dropdown-menu">
+		        <li><a class="dropdown-item" href="{{ url_for('main.waste_units') }}">All Waste Units</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('main.landfills') }}">Landfills</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('main.impoundments') }}">Impoundments</a></li>
 		      </ul>
             </li>
 		   </ul>
 		  </li>
-          </ul>
-          <ul class="nav navbar-nav">
-		    <li><a href={{ url_for('main.units') }}>Units</a></li>
           </ul>
 		  <ul class="nav navbar-nav">
 			<li><a href={{ url_for('main.sample_ids') }}>Sample IDs</a></li>

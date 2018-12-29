@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Envirobase - ASTs{% endblock %}
+
+{% block page_content %}
+<table class="table">
+	<thead class="thead-dark">
+		<tr>
+		    <th scope="col">Tank</th>
+		    <th scope="col">Facility</th>
+			<th scope="col">Capacity</th>
+			<th scope="col">Stored Substance</th>
+			<th scope="col">Status</th>
+			<th scope="col">Created On</th>
+			<th scope="col">Last Updated</th>
+		</tr>
+	</thead>
+	<tbody>
+    {% for aboveground_tank in aboveground_tanks %}
+	<tr>
+		<td>{{ aboveground_tank.tank_id }}</td>
+		<td>{{ aboveground_tank.facility.name }}</td>
+		<td>{{ aboveground_tank.capacity }}</td>
+		<td>{{ aboveground_tank.stored_substance }}</td>
+		<td>{{ aboveground_tank.status }}</td>
+		<td>{{ aboveground_tank.created_on }}</td>
+		<td>{{ aboveground_tank.updated_on }}</td>
+	</tr>
+	{% endfor %}
+	</tbody>
+</table>
+{% endblock %}

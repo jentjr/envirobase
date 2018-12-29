@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Envirobase - Impoundments{% endblock %}
+
+{% block page_content %}
+<table class="table">
+	<thead class="thead-dark">
+		<tr>
+		    <th scope="col">ID</th>
+			<th scope="col">Facility</th>
+			<th scope="col">Impoundment</th>
+			<th scope="col">Created On</th>
+			<th scope="col">Last Updated</th>
+		</tr>
+	</thead>
+	<tbody>
+    {% for impoundment in impoundments %}
+	<tr>
+	    <td>{{ impoundment.unit_id }}</td>
+		<td>{{ impoundment.facility.name }}</td>
+		<td>{{ impoundment.name }}</td>
+		<td>{{ impoundment.created_on }}</td>
+		<td>{{ impoundment.updated_on }}</td>
+	</tr>
+	{% endfor %}
+	</tbody>
+</table>
+{% endblock %}

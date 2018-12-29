@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Envirobase - Storage Tanks{% endblock %}
+
+{% block page_content %}
+<table class="table">
+	<thead class="thead-dark">
+		<tr>
+		    <th scope="col">Tank</th>
+		    <th scope="col">Facility</th>
+			<th scope="col">Capacity</th>
+			<th scope="col">Stored Substance</th>
+			<th scope="col">Status</th>
+			<th scope="col">Created On</th>
+			<th scope="col">Last Updated</th>
+		</tr>
+	</thead>
+	<tbody>
+    {% for storage_tank in storage_tanks %}
+	<tr>
+	    <td>{{ storage_tank.tank_id }}</td>
+	    <td>{{ storage_tank.facility.name }}</td>
+		<td>{{ storage_tank.capacity }}</td>
+		<td>{{ storage_tank.stored_substance }}</td>
+		<td>{{ storage_tank.status }}</td>
+		<td>{{ storage_tank.created_on }}</td>
+		<td>{{ storage_tank.updated_on }}</td>
+	</tr>
+	{% endfor %}
+	</tbody>
+</table>
+{% endblock %}

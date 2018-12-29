@@ -6,7 +6,7 @@
 <table class="table">
 	<thead class="thead-dark">
 		<tr>
-            <th scope="col">Site</th>
+            <th scope="col">Facility</th>
 			<th scope="col">Sample ID</th>
 			<th scope="col">Sample Type</th>
 		</tr>
@@ -14,7 +14,7 @@
 	<tbody>
     {% for location in sample_locations %}
 	<tr>
-        <td>{{ location.site.site_name }}</td>
+        <td>{{ location.facility.name }}</td>
 		<td>{{ location.sample_id }}</td>
 		<td>{{ location.sample_type }}</td>
 	</tr>

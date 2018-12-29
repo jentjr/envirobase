@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Envirobase - Waste Units{% endblock %}
+
+{% block page_content %}
+<table class="table">
+	<thead class="thead-dark">
+		<tr>
+		    <th scope="col">ID</th>
+			<th scope="col">Facility</th>
+			<th scope="col">Waste Unit</th>
+			<th scope="col">Type</th>
+			<th scope="col">Created On</th>
+			<th scope="col">Last Updated</th>
+		</tr>
+	</thead>
+	<tbody>
+    {% for waste_unit in waste_units %}
+	<tr>
+	    <td>{{ waste_unit.unit_id }}</td>
+		<td>{{ waste_unit.facility.name }}</td>
+		<td>{{ waste_unit.name }}</td>
+		<td>{{ waste_unit.unit_type }}</td>
+		<td>{{ waste_unit.created_on }}</td>
+		<td>{{ waste_unit.updated_on }}</td>
+	</tr>
+	{% endfor %}
+	</tbody>
+</table>
+{% endblock %}
