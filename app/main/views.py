@@ -190,7 +190,9 @@ def parameters_search(search_description):
         page, per_page=current_app.config["ENVIROBASE_PER_PAGE"], error_out=False
     )
     parameters = pagination.items
-    return render_template("parameters.html", parameters=parameters, pagination=pagination)
+    return render_template(
+        "parameters.html", parameters=parameters, pagination=pagination
+    )
 
 
 @main.route("/mediums")

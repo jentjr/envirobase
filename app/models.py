@@ -38,6 +38,9 @@ class Facility(db.Model, BaseEntity):
     latitude = db.Column(db.Float, nullable=True)
     geometry = db.Column(Geometry(geometry_type="POINT", srid=4326))
 
+    storage_tank = db.relationship("StorageTank", back_populates="facility")
+    waste_unit = db.relationship("WasteUnit", back_populates="facility")
+    
     def __repr__(self):
         return f"Facility('{self.name}', '{self.address}', '{self.city}','{self.state}', '{self.zipcode}', '{self.longitude}', '{self.latitude}')"
 
@@ -104,29 +107,43 @@ class Facility(db.Model, BaseEntity):
             zipcode=zipcode,
             longitude=longitude,
             latitude=latitude,
+            created_on=datetime.utcnow()
+            # geometry = "POINT({} {})".format(longitude, latitude)
         )
 
 
 class WasteUnit(db.Model, BaseEntity):
     __tablename__ = "waste_unit"
+    __table_args__ = (db.UniqueConstraint("name", "facility_id"),)
 
     unit_id = db.Column(db.Integer, primary_key=True)
     facility_id = db.Column(db.Integer, db.ForeignKey("facility.facility_id"))
     name = db.Column(db.String(64), nullable=False)
     constructed_date = db.Column(db.Date)
-    unit_type = db.Column(db.String(12), nullable=False)
     geometry = db.Column(Geometry(geometry_type="POLYGON", srid=4326))
+    unit_type = db.Column(db.String(12), nullable=False)
 
-    facility = db.relationship("Facility")
+    facility = db.relationship("Facility", back_populates="waste_unit")
 
     __mapper_args__ = {
         "polymorphic_identity": "waste_unit",
         "polymorphic_on": unit_type,
     }
 
+    def to_json(self):
+        json_waste_unit = {
+            "url": url_for("api.get_waste_unit", unit_id=self.unit_id),
+            "name": self.name,
+            "constructed_date": self.constructed_date,
+            "unit_type": self.unit_type,
+        }
+        return json_waste_unit
+
 
 class Landfill(WasteUnit, BaseEntity):
     __tablename__ = "landfill"
+    
+    permit_id = db.Column(db.String(24))
 
     __mapper_args__ = {"polymorphic_identity": "landfill"}
 
@@ -144,12 +161,13 @@ class Landfill(WasteUnit, BaseEntity):
 class Impoundment(WasteUnit, BaseEntity):
     __tablename__ = "impoundment"
 
+    dam_id = db.Column(db.String(24))
     hazard_class = db.Column(db.Text)
 
     __mapper_args__ = {"polymorphic_identity": "impoundment"}
 
     def __repr__(self):
-        return f"Impoundment('{self.name}')"
+        return f"Impoundment('{self.dam_id}', '{self.name}', '{self.hazard_class}')"
 
     def to_json(self):
         json_impoundment = {
@@ -160,11 +178,13 @@ class Impoundment(WasteUnit, BaseEntity):
 
 
 class StorageTank(db.Model, BaseEntity):
-    """Base class for UndergroundStorageTank and AbovegroundStorageTank classes"""
+    """Base class for UndergroundStorageTank and AbovegroundStorageTank classes using Joined Table Inheritance. When StorageTank is queried only columns in this class are returned."""
 
     __tablename__ = "storage_tank"
+    __table_args__ = (db.UniqueConstraint("tank_registration_id", "facility_id"),)
 
     tank_id = db.Column(db.Integer, primary_key=True)
+    tank_registration_id = db.Column(db.String(12))
     facility_id = db.Column(db.Integer, db.ForeignKey("facility.facility_id"))
     capacity = db.Column(db.Integer)
     stored_substance = db.Column(db.String(64))
@@ -172,24 +192,64 @@ class StorageTank(db.Model, BaseEntity):
     longitude = db.Column(db.Float)
     latitude = db.Column(db.Float)
     geometry = db.Column(Geometry(geometry_type="POINT", srid=4326))
-    tank_type = db.Column(db.String(24))
+    tank_type = db.Column(db.String(3))
 
-    facility = db.relationship("Facility")
+    facility = db.relationship("Facility", back_populates="storage_tank")
 
     __mapper_args__ = {
         "polymorphic_identity": "storage_tank",
         "polymorphic_on": tank_type,
     }
 
+    def __repr__(self):
+        return f"StorageTank('{self.tank_id}', '{self.tank_type}', '{self.stored_substance}', '{self.status}')"
+
+    def to_json(self):
+        json_storage_tank = {
+            "url": url_for("api.get_storage_tank", tank_id=self.tank_id),
+            "facility": self.facility.name,
+            "tank_registration_id": self.tank_registration_id,
+            "capacity": self.capacity,
+            "stored_substance": self.stored_substance,
+            "status": self.status,
+            "tank_type": self.tank_type,
+            "longitude": self.longitude,
+            "latitude": self.latitude,
+        }
+        return json_storage_tank
+
+    @staticmethod
+    def from_json(json_storage_tank):
+        facility_id = json_storage_tank.get("facility_id")
+        tank_registration_id = json_storage_tank.get("tank_registration_id")
+        capacity = json_storage_tank.get("capacity")
+        stored_substance = json_storage_tank.get("stored_substance")
+        status = json_storage_tank.get("status")
+        tank_type = json_storage_tank.get("tank_type")
+        longitude = json_storage_tank.get("longitude")
+        latitude = json_storage_tank.get("latitude")
+        if facility_id is None or facility_id == "":
+            raise ValidationError("Tank must be associated with a Facility")
+        return StorageTank(
+            facility_id=facility_id,
+            tank_registration_id=tank_registration_id,
+            capacity=capacity,
+            stored_substance=stored_substance,
+            status=status,
+            tank_type=tank_type,
+            longitude=longitude,
+            latitude=latitude,
+            created_on=datetime.utcnow()
+            # geometry = "POINT({} {})".format(longitude, latitude)
+        )
+
 
 class UndergroundStorageTank(StorageTank, BaseEntity):
-    __tablename__ = "underground_storage_tank"
+    """Subclass to StorageTank with Joined Table Inheritance. When UndergroundStorageTank is queried all columns from StorageTank are inherited."""
 
-    tank_id = db.Column(
-        db.Integer, db.ForeignKey("storage_tank.tank_id"), primary_key=True
-    )
+    __tablename__ = "ust"
 
-    __mapper_args__ = {"polymorphic_identity": "underground_storage_tank"}
+    __mapper_args__ = {"polymorphic_identity": "ust"}
 
     def __repr__(self):
         return f"UndergroundStorageTank('{self.tank_id}', '{self.tank_type}', '{self.stored_substance}', '{self.status}')"
@@ -204,13 +264,11 @@ class UndergroundStorageTank(StorageTank, BaseEntity):
 
 
 class AbovegroundStorageTank(StorageTank, BaseEntity):
-    __tablename__ = "aboveground_storage_tank"
+    """Subclass to StorageTank with Joined Table Inheritance. When AbovegroundStorageTank is queried all columns from StorageTank are inherited."""
 
-    tank_id = db.Column(
-        db.Integer, db.ForeignKey("storage_tank.tank_id"), primary_key=True
-    )
+    __tablename__ = "ast"
 
-    __mapper_args__ = {"polymorphic_identity": "aboveground_storage_tank"}
+    __mapper_args__ = {"polymorphic_identity": "ast"}
 
     def __repr__(self):
         return f"AbovegroundStorageTank('{self.tank_id}', '{self.tank_type}', '{self.stored_substance}', '{self.status}')"
@@ -322,7 +380,7 @@ class SampleId(db.Model, BaseEntity):
 
     __mapper_args__ = {
         "polymorphic_identity": "sample_id",
-        "polymorphic_on": sample_type
+        "polymorphic_on": sample_type,
     }
 
     def __repr__(self):
@@ -360,7 +418,7 @@ class Boring(db.Model, BaseEntity):
 
 class MonitoringWell(SampleId, BaseEntity):
     __tablename__ = "monitoring_well"
-    
+
     sample_id = db.Column(
         db.Integer, db.ForeignKey("sample_id.sample_id"), primary_key=True
     )
@@ -388,8 +446,9 @@ class MonitoringWell(SampleId, BaseEntity):
     notes = db.Column(db.Text)
 
     boring = db.relationship("Boring")
-    
+
     __mapper_args__ = {"polymorphic_identity": "monitoring_well"}
+
 
 class Piezometer(SampleId, BaseEntity):
     __tablename__ = "piezometer"
@@ -418,8 +477,9 @@ class Piezometer(SampleId, BaseEntity):
     notes = db.Column(db.Text)
 
     boring = db.relationship("Boring")
-    
+
     __mapper_args__ = {"polymorphic_identity": "piezometer"}
+
 
 class SampleResult(db.Model, BaseEntity):
     __tablename__ = "sample_result"
@@ -429,7 +489,7 @@ class SampleResult(db.Model, BaseEntity):
         ),
     )
 
-    id = db.Column(db.Integer, primary_key=True)
+    result_id = db.Column(db.Integer, primary_key=True)
     lab_id = db.Column(db.Text)
     facility_id = db.Column(db.ForeignKey("facility.facility_id"), nullable=False)
     sample_id = db.Column(db.ForeignKey("sample_id.sample_id"), nullable=False)

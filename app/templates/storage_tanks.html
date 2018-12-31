@@ -6,11 +6,15 @@
 <table class="table">
 	<thead class="thead-dark">
 		<tr>
-		    <th scope="col">Tank</th>
+		    <th scope="col">Tank ID</th>
+		    <th scope="col">Tank Registration</th>
+		    <th scope="col">Tank Type</th>
 		    <th scope="col">Facility</th>
 			<th scope="col">Capacity</th>
 			<th scope="col">Stored Substance</th>
 			<th scope="col">Status</th>
+			<th scope="col">Longitude</th>
+			<th scope="col">Latitude</th>
 			<th scope="col">Created On</th>
 			<th scope="col">Last Updated</th>
 		</tr>
@@ -19,10 +23,14 @@
     {% for storage_tank in storage_tanks %}
 	<tr>
 	    <td>{{ storage_tank.tank_id }}</td>
+	    <td>{{ storage_tank.tank_registration_id }}</td>
+	    <td>{{ storage_tank.tank_type }}</td>
 	    <td>{{ storage_tank.facility.name }}</td>
 		<td>{{ storage_tank.capacity }}</td>
 		<td>{{ storage_tank.stored_substance }}</td>
 		<td>{{ storage_tank.status }}</td>
+		<td>{{ storage_tank.longitude }}</td>
+		<td>{{ storage_tank.latitude }}</td>
 		<td>{{ storage_tank.created_on }}</td>
 		<td>{{ storage_tank.updated_on }}</td>
 	</tr>

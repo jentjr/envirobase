@@ -27,7 +27,7 @@
 var facilites = $.ajax({
           url:"http://127.0.0.1:5000/api/v1/facilities/",
           dataType: "json",
-          success: console.log("County data successfully loaded."),
+          success: console.log("Facility data successfully loaded."),
           error: function (xhr) {
             alert(xhr.statusText)
           }
@@ -35,7 +35,7 @@ var facilites = $.ajax({
         // Specify that this code should run once the county data request is complete
         $.when(facilites).done(function() {
             var map = L.map('map')
-                .setView([41.74, -99.76], 4);
+                .setView([41.74, -99.76], 2);
             var basemap = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
                 maxZoom: 19

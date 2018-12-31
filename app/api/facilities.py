@@ -2,6 +2,7 @@
 API for Facilities
 """
 
+from datetime import datetime
 from flask import jsonify, request, current_app, url_for
 from . import api
 from .. import db
@@ -57,7 +58,7 @@ def get_facility(facility_id):
 
 @api.route("/facilities/<name>", methods=["GET"])
 def get_facility_name(name):
-    facilites = Facility.query.filter(Facility.name.ilike(name + "%")).all()
+    facilites = Facility.query.filter(Facility.name.ilike("%" + name + "%")).all()
     data = [
         {
             "type": "Feature",
@@ -79,7 +80,7 @@ def get_facility_name(name):
     return jsonify({"type": "FeatureCollection", "features": data})
 
 
-@api.route("/facilites/", methods=["POST"])
+@api.route("/facilities/", methods=["POST"])
 def new_facility():
     facility = Facility.from_json(request.json)
     db.session.add(facility)
@@ -91,7 +92,7 @@ def new_facility():
     )
 
 
-@api.route("/facilites/<int:facility_id>", methods=["PUT"])
+@api.route("/facilities/<int:facility_id>", methods=["PUT"])
 def edit_facility(facility_id):
     facility = Facility.query.get_or_404(facility_id)
     facility.name = request.json.get("name", facility.name)
@@ -101,6 +102,7 @@ def edit_facility(facility_id):
     facility.zipcode = request.json.get("zipcode", facility.zipcode)
     facility.latitude = request.json.get("latitude", facility.latitude)
     facility.longitude = request.json.get("longitude", facility.longitude)
+    facility.updated_on = datetime.utcnow()
     db.session.add(facility)
     db.session.commit()
     return jsonify(facility.to_json())
