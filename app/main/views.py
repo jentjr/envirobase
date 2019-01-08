@@ -1,7 +1,7 @@
 from flask import render_template, url_for, redirect, current_app, flash, request
 from . import main
 from .. import db
-from .forms import FacilityForm, StorageTankForm
+from .forms import FacilityForm, StorageTankForm, WasteUnitForm, MonitoringWellForm
 from ..models import (
     Boring,
     MediumCode,
@@ -169,6 +169,28 @@ def aboveground_tanks():
 def waste_units():
     waste_units = WasteUnit.query.all()
     return render_template("waste_units.html", waste_units=waste_units)
+
+
+@main.route("/facilities/<int:facility_id>/add-waste-unit", methods=["GET", "POST"])
+def add_waste_unit(facility_id):
+    form = WasteUnitForm()
+    if form.validate_on_submit():
+        name = WasteUnit.query.filter_by(
+            name=form.name.data, facility_id=facility_id
+        ).first()
+        if name is None:
+            waste_unit = WasteUnit(
+                facility_id=facility_id,
+                name=form.name.data,
+                constructed_date=form.constructed_date.data,
+                unit_type=form.unit_type.data,
+            )
+            db.session.add(waste_unit)
+            db.session.commit()
+            return redirect(url_for(".waste_units"))
+        else:
+            flash("The waste unit already exists.")
+    return render_template("edit_waste_unit.html", form=form)
 
 
 @main.route("/landfills")

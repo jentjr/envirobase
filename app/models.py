@@ -30,6 +30,7 @@ class Facility(db.Model, BaseEntity):
 
     facility_id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Text, nullable=False, unique=True)
+    type = db.Column(db.Text)
     address = db.Column(db.Text)
     city = db.Column(db.Text)
     state = db.Column(db.CHAR(2))
@@ -189,6 +190,8 @@ class StorageTank(db.Model, BaseEntity):
     tank_id = db.Column(db.Integer, primary_key=True)
     tank_registration_id = db.Column(db.String(12))
     facility_id = db.Column(db.Integer, db.ForeignKey("facility.facility_id"))
+    date_installed = db.Column(db.Date)
+    date_removed = db.Column(db.Date)
     capacity = db.Column(db.Integer)
     stored_substance = db.Column(db.String(64))
     status = db.Column(db.String(10))
@@ -254,6 +257,20 @@ class UndergroundStorageTank(StorageTank, BaseEntity):
     __tablename__ = "ust"
 
     __mapper_args__ = {"polymorphic_identity": "ust"}
+
+    tank_double_wall = db.Column(db.Boolean)
+    inner_tank_material = db.Column(db.Text)
+    outer_tank_material = db.Column(db.Text)
+    tank_leak_detection = db.Column(db.Text)
+    tank_corrosion_protection = db.Column(db.Text)
+    tank_monitoring_system = db.Column(db.Text)
+    piping_double_wall = db.Column(db.Boolean)
+    piping_type = db.Column(db.Text)  # Pressurized or suction
+    inner_pipe_material = db.Column(db.Text)
+    outer_pipe_material = db.Column(db.Text)
+    piping_corrosion_protection = db.Column(db.Text)
+    spill_protection = db.Column(db.Text)
+    overflow_protection = db.Column(db.Text)
 
     def __repr__(self):
         return f"UndergroundStorageTank('{self.tank_id}', '{self.tank_type}', '{self.stored_substance}', '{self.status}')"

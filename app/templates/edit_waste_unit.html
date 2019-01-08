@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Envirobase - Add/Edit Waste Unit{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+  <h1>Add/Edit Waste Unit</h1>
+</div>
+<div>
+  {{ wtf.quick_form(form) }}
+</div>
+{% endblock %}
