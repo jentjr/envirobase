@@ -40,9 +40,9 @@ class Facility(db.Model, BaseEntity):
 
     storage_tank = db.relationship("StorageTank", back_populates="facility")
     waste_unit = db.relationship("WasteUnit", back_populates="facility")
-    
+
     def __repr__(self):
-        return f"Facility('{self.name}', '{self.address}', '{self.city}','{self.state}', '{self.zipcode}', '{self.longitude}', '{self.latitude}')"
+        return f"Facility('{self.facility_id}','{self.name}', '{self.address}', '{self.city}','{self.state}', '{self.zipcode}')"
 
     @classmethod
     def add_facility(cls, name, address, city, state, zipcode, longitude, latitude):
@@ -130,6 +130,9 @@ class WasteUnit(db.Model, BaseEntity):
         "polymorphic_on": unit_type,
     }
 
+    def __repr__(self):
+        return f"WasteUnit('{self.name}')"
+
     def to_json(self):
         json_waste_unit = {
             "url": url_for("api.get_waste_unit", unit_id=self.unit_id),
@@ -142,7 +145,7 @@ class WasteUnit(db.Model, BaseEntity):
 
 class Landfill(WasteUnit, BaseEntity):
     __tablename__ = "landfill"
-    
+
     permit_id = db.Column(db.String(24))
 
     __mapper_args__ = {"polymorphic_identity": "landfill"}
@@ -192,7 +195,7 @@ class StorageTank(db.Model, BaseEntity):
     longitude = db.Column(db.Float)
     latitude = db.Column(db.Float)
     geometry = db.Column(Geometry(geometry_type="POINT", srid=4326))
-    tank_type = db.Column(db.String(3))
+    tank_type = db.Column(db.String(3), nullable=False)
 
     facility = db.relationship("Facility", back_populates="storage_tank")
 
@@ -200,6 +203,7 @@ class StorageTank(db.Model, BaseEntity):
         "polymorphic_identity": "storage_tank",
         "polymorphic_on": tank_type,
     }
+    geometry = db.Column(Geometry(geometry_type="POINT", srid=4326))
 
     def __repr__(self):
         return f"StorageTank('{self.tank_id}', '{self.tank_type}', '{self.stored_substance}', '{self.status}')"
@@ -324,6 +328,7 @@ class SampleParameter(db.Model, BaseEntity):
     param_cd = db.Column(db.CHAR(5), primary_key=True)
     group_name = db.Column(db.Text)
     description = db.Column(db.Text)
+
     epa_equivalence = db.Column(db.Text)
     statistical_basis = db.Column(db.Text)
     time_basis = db.Column(db.Text)
@@ -374,6 +379,9 @@ class SampleId(db.Model, BaseEntity):
 
     sample_id = db.Column(db.Integer, primary_key=True, unique=True)
     facility_id = db.Column(db.ForeignKey("facility.facility_id"))
+    longitude = db.Column(db.Float, nullable=True)
+    latitude = db.Column(db.Float, nullable=True)
+    geometry = db.Column(Geometry(geometry_type="POINT", srid=4326))
     sample_type = db.Column(db.String(24))
 
     facility = db.relationship("Facility")
@@ -384,10 +392,7 @@ class SampleId(db.Model, BaseEntity):
     }
 
     def __repr__(self):
-        return "<SampleId(sample_id='%s', sample_type='%s')>" % (
-            self.sample_id,
-            self.sample_type,
-        )
+        return f"SampleId('{self.sample_id}', '{self.facility.name}', '{self.sample_type}')"
 
     def to_json(self):
         json_sample_location = {
@@ -423,10 +428,7 @@ class MonitoringWell(SampleId, BaseEntity):
         db.Integer, db.ForeignKey("sample_id.sample_id"), primary_key=True
     )
     well_id = db.Column(db.Integer, primary_key=True)
-    boring_id = db.Column(db.Integer, db.ForeignKey("boring.boring_id"), nullable=False)
-    longitude = db.Column(db.Float, nullable=True)
-    latitude = db.Column(db.Float, nullable=True)
-    geometry = db.Column(Geometry(geometry_type="POINT", srid=4326))
+    boring_id = db.Column(db.Integer, db.ForeignKey("boring.boring_id"))
     installation_date = db.Column(db.Date)
     abandoned_date = db.Column(db.Date)
     top_riser = db.Column(db.Float)
@@ -457,10 +459,7 @@ class Piezometer(SampleId, BaseEntity):
         db.Integer, db.ForeignKey("sample_id.sample_id"), primary_key=True
     )
     piezometer_id = db.Column(db.Integer, primary_key=True)
-    boring_id = db.Column(db.Integer, db.ForeignKey("boring.boring_id"), nullable=False)
-    longitude = db.Column(db.Float, nullable=True)
-    latitude = db.Column(db.Float, nullable=True)
-    geometry = db.Column(Geometry(geometry_type="POINT", srid=4326))
+    boring_id = db.Column(db.Integer, db.ForeignKey("boring.boring_id"))
     installation_date = db.Column(db.Date)
     abandoned_date = db.Column(db.Date)
     top_riser = db.Column(db.Float)
@@ -496,7 +495,7 @@ class SampleResult(db.Model, BaseEntity):
     param_cd = db.Column(db.ForeignKey("sample_parameter.param_cd"), nullable=False)
     sample_date = db.Column(db.Date, nullable=False)
     sample_time = db.Column(db.Time, nullable=True)
-    medium_cd = db.Column(db.ForeignKey("medium_code.medium_cd"), default="WG")
+    medium_cd = db.Column(db.ForeignKey("medium_code.medium_cd"))
     prep_method = db.Column(db.Text)
     analysis_method = db.Column(db.Text, nullable=True)
     analysis_flag = db.Column(db.CHAR(1), nullable=True)

@@ -1,7 +1,7 @@
 from flask import render_template, url_for, redirect, current_app, flash, request
 from . import main
 from .. import db
-from .forms import FacilityForm
+from .forms import FacilityForm, StorageTankForm
 from ..models import (
     Boring,
     MediumCode,
@@ -83,7 +83,7 @@ def edit_facility_id(facility_id):
         return redirect(url_for(".facilities"))
     form.name.data = facility.name
     form.address.data = facility.address
-    form.city.data = facility.city
+    form.city.data = facility.cityieldWaterQualityForm
     form.state.data = facility.state
     form.zipcode.data = facility.zipcode
     form.longitude.data = facility.longitude
@@ -109,7 +109,7 @@ def edit_facility_name(name):
         return redirect(url_for(".facilities"))
     form.name.data = facility.name
     form.address.data = facility.address
-    form.city.data = facility.city
+    form.city.data = facilitankty.city
     form.state.data = facility.state
     form.zipcode.data = facility.zipcode
     form.longitude.data = facility.longitude
@@ -121,6 +121,32 @@ def edit_facility_name(name):
 def storage_tanks():
     storage_tanks = StorageTank.query.all()
     return render_template("storage_tanks.html", storage_tanks=storage_tanks)
+
+
+@main.route("/facilities/<int:facility_id>/add-storage-tank", methods=["GET", "POST"])
+def add_storage_tank(facility_id):
+    form = StorageTankForm()
+    if form.validate_on_submit():
+        tank_registration_id = StorageTank.query.filter_by(
+            tank_registration_id=form.tank_registration_id.data, facility_id=facility_id
+        ).first()
+        if tank_registration_id is None:
+            storage_tank = StorageTank(
+                facility_id=facility_id,
+                tank_registration_id=form.tank_registration_id.data,
+                capacity=form.capacity.data,
+                stored_substance=form.stored_substance.data,
+                status=form.status.data,
+                tank_type=form.tank_type.data,
+                longitude=form.longitude.data,
+                latitude=form.latitude.data,
+            )
+            db.session.add(storage_tank)
+            db.session.commit()
+            return redirect(url_for(".storage_tanks"))
+        else:
+            flash("The storage tank already exists.")
+    return render_template("edit_storage_tank.html", form=form)
 
 
 @main.route("/underground-tanks")
