@@ -106,3 +106,11 @@ def edit_facility(facility_id):
     db.session.add(facility)
     db.session.commit()
     return jsonify(facility.to_json())
+
+
+@api.route("/facilities/<int:facility_id>", methods=["DELETE"])
+def delete_facility(facility_id):
+    facility = Facility.query.get_or_404(facility_id)
+    db.session.delete(facility)
+    db.session.commit()
+    return {}

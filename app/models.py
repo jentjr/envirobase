@@ -206,7 +206,6 @@ class StorageTank(db.Model, BaseEntity):
         "polymorphic_identity": "storage_tank",
         "polymorphic_on": tank_type,
     }
-    geometry = db.Column(Geometry(geometry_type="POINT", srid=4326))
 
     def __repr__(self):
         return f"StorageTank('{self.tank_id}', '{self.tank_type}', '{self.stored_substance}', '{self.status}')"
@@ -255,7 +254,6 @@ class UndergroundStorageTank(StorageTank, BaseEntity):
     """Subclass to StorageTank with Joined Table Inheritance. When UndergroundStorageTank is queried all columns from StorageTank are inherited."""
 
     __tablename__ = "ust"
-
     __mapper_args__ = {"polymorphic_identity": "ust"}
 
     tank_double_wall = db.Column(db.Boolean)
@@ -288,7 +286,6 @@ class AbovegroundStorageTank(StorageTank, BaseEntity):
     """Subclass to StorageTank with Joined Table Inheritance. When AbovegroundStorageTank is queried all columns from StorageTank are inherited."""
 
     __tablename__ = "ast"
-
     __mapper_args__ = {"polymorphic_identity": "ast"}
 
     def __repr__(self):
@@ -393,15 +390,18 @@ class SampleParameter(db.Model, BaseEntity):
 
 class SampleId(db.Model, BaseEntity):
     __tablename__ = "sample_id"
+    __table_args__=(db.UniqueConstraint("sample_id", "facility_id"),)
 
-    sample_id = db.Column(db.Integer, primary_key=True, unique=True)
-    facility_id = db.Column(db.ForeignKey("facility.facility_id"))
+    sample_id = db.Column(db.Integer, primary_key=True)
+    facility_id = db.Column(db.Integer, db.ForeignKey("facility.facility_id"))
+    sample_name = db.Column(db.Text)
+    description = db.Column(db.Text)
     longitude = db.Column(db.Float, nullable=True)
     latitude = db.Column(db.Float, nullable=True)
     geometry = db.Column(Geometry(geometry_type="POINT", srid=4326))
     sample_type = db.Column(db.String(24))
 
-    facility = db.relationship("Facility")
+    facility = db.relationship("Facility", back_populates="sample_id")
 
     __mapper_args__ = {
         "polymorphic_identity": "sample_id",
@@ -430,8 +430,9 @@ class SampleId(db.Model, BaseEntity):
         return SampleId(sample_id=sample_id, sample_type=sample_type)
 
 
-class Boring(db.Model, BaseEntity):
+class Boring(SampleId, BaseEntity):
     __tablename__ = "boring"
+    __mapper_args__ = {"polymorphic_identity": "boring"}
 
     boring_id = db.Column(db.Integer, primary_key=True)
     start_date = db.Column(db.Date)
@@ -440,11 +441,9 @@ class Boring(db.Model, BaseEntity):
 
 class MonitoringWell(SampleId, BaseEntity):
     __tablename__ = "monitoring_well"
+    __mapper_args__ = {"polymorphic_identity": "monitoring_well"}
 
-    sample_id = db.Column(
-        db.Integer, db.ForeignKey("sample_id.sample_id"), primary_key=True
-    )
-    well_id = db.Column(db.Integer, primary_key=True)
+    well_id = db.Column(db.Text, primary_key=True)
     boring_id = db.Column(db.Integer, db.ForeignKey("boring.boring_id"))
     installation_date = db.Column(db.Date)
     abandoned_date = db.Column(db.Date)
@@ -465,17 +464,24 @@ class MonitoringWell(SampleId, BaseEntity):
     notes = db.Column(db.Text)
 
     boring = db.relationship("Boring")
-
-    __mapper_args__ = {"polymorphic_identity": "monitoring_well"}
+    
+    def __repr__(self):
+        return f"MonitoringWell('{self.well_id}')"
+    
+    def to_json(self):
+        json_monitoring_well = {
+            "url": url_for("api.get_monitoring_well", well_id=self.well_id),
+            "top_screen": self.top_screen,
+            "bottom_screen": self.bottom_screen,
+            }
+        return json_monitoring_well    
 
 
 class Piezometer(SampleId, BaseEntity):
     __tablename__ = "piezometer"
+    __mapper_args__ = {"polymorphic_identity": "piezometer"}
 
-    sample_id = db.Column(
-        db.Integer, db.ForeignKey("sample_id.sample_id"), primary_key=True
-    )
-    piezometer_id = db.Column(db.Integer, primary_key=True)
+    piezometer_id = db.Column(db.Text, primary_key=True)
     boring_id = db.Column(db.Integer, db.ForeignKey("boring.boring_id"))
     installation_date = db.Column(db.Date)
     abandoned_date = db.Column(db.Date)
@@ -494,7 +500,15 @@ class Piezometer(SampleId, BaseEntity):
 
     boring = db.relationship("Boring")
 
-    __mapper_args__ = {"polymorphic_identity": "piezometer"}
+    def __repr__(self):
+        return f"Piezometer('{self.piezometer_id}')"
+    
+    def to_json(self):
+        json_piezometer = {
+            "url": url_for("api.get_piezometer", piezometer_id=self.piezometer_id),
+            "bottom_piezometer": self.bottom_piezometer,
+            }
+        return json_piezometer  
 
 
 class SampleResult(db.Model, BaseEntity):
@@ -503,16 +517,19 @@ class SampleResult(db.Model, BaseEntity):
         db.UniqueConstraint(
             "lab_id", "sample_id", "sample_date", "param_cd", "analysis_result"
         ),
+        db.CheckConstraint(
+            "param_cd ~ similar_escape('[[:digit:]]{5}'::text, NULL::text)"
+        ),
     )
 
     result_id = db.Column(db.Integer, primary_key=True)
     lab_id = db.Column(db.Text)
-    facility_id = db.Column(db.ForeignKey("facility.facility_id"), nullable=False)
-    sample_id = db.Column(db.ForeignKey("sample_id.sample_id"), nullable=False)
-    param_cd = db.Column(db.ForeignKey("sample_parameter.param_cd"), nullable=False)
+    facility_id = db.Column(db.Integer, db.ForeignKey("facility.facility_id"))
+    sample_id = db.Column(db.Integer, db.ForeignKey("sample_id.sample_id"))
+    param_cd = db.Column(db.CHAR(5), db.ForeignKey("sample_parameter.param_cd"))
+    medium_cd = db.Column(db.String(3), db.ForeignKey("medium_code.medium_cd"))
     sample_date = db.Column(db.Date, nullable=False)
     sample_time = db.Column(db.Time, nullable=True)
-    medium_cd = db.Column(db.ForeignKey("medium_code.medium_cd"))
     prep_method = db.Column(db.Text)
     analysis_method = db.Column(db.Text, nullable=True)
     analysis_flag = db.Column(db.CHAR(1), nullable=True)
@@ -530,3 +547,13 @@ class SampleResult(db.Model, BaseEntity):
     medium_code = db.relationship("MediumCode")
     sample_parameter = db.relationship("SampleParameter")
     facility = db.relationship("Facility")
+
+    def __repr__(self):
+        return f"SampleResult('{self.result_id}')"
+    
+    def to_json(self):
+        json_sample_result = {
+            "url": url_for("api.get_sample_result", result_id=self.result_id),
+            "lab_id": self.lab_id,
+            }
+        return json_sample_result  
