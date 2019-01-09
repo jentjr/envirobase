@@ -1,7 +1,7 @@
 from flask import render_template, url_for, redirect, current_app, flash, request
 from . import main
 from .. import db
-from .forms import FacilityForm, StorageTankForm, WasteUnitForm, MonitoringWellForm
+from .forms import FacilityForm, StorageTankForm, WasteUnitForm, WellForm
 from ..models import (
     Boring,
     MediumCode,
@@ -15,7 +15,7 @@ from ..models import (
     AbovegroundStorageTank,
     SampleId,
     SampleResult,
-    MonitoringWell,
+    Well,
 )
 
 
@@ -109,7 +109,7 @@ def edit_facility_name(name):
         return redirect(url_for(".facilities"))
     form.name.data = facility.name
     form.address.data = facility.address
-    form.city.data = facilitankty.city
+    form.city.data = facility.city
     form.state.data = facility.state
     form.zipcode.data = facility.zipcode
     form.longitude.data = facility.longitude
@@ -210,7 +210,73 @@ def sample_ids():
     sample_ids = SampleId.query.all()
     return render_template("sample_ids.html", sample_ids=sample_ids)
 
+@main.route("/wells")
+def wells():
+    wells = Well.query.all()
+    return render_template("wells.html", wells=wells)   
+    
+@main.route("/facilities/<int:facility_id>/add-well", methods=["GET", "POST"])
+def add_well(facility_id):
+    form = WellForm()
+    if form.validate_on_submit():
+        well_id = Well.query.filter_by(
+            well_id=form.well_id.data, facility_id=facility_id
+        ).first()
+        if well_id is None:
+            well = Well(
+                facility_id=facility_id,
+                well_id=form.well_id.data,
+                well_type=form.well_type.data,
+                longitude=form.longitude.data,
+                latitude=form.latitude.data,
+                installation_date=form.installation_date.data,
+                abandoned_date=form.abandoned_date.data,
+                top_riser=form.top_riser.data,
+                top_bent_seal=form.top_bent_seal.data,
+                top_gravel_pack=form.top_gravel_pack.data,
+                top_screen=form.top_screen.data,
+            )
+            db.session.add(well)
+            db.session.commit()
+            return redirect(url_for(".wells"))
+        else:
+            flash("The well already exists.")
+    return render_template("edit_well.html", form=form)
+    
+@main.route("/facilities/<int:facility_id>/well/<int:sample_id>", methods=["GET", "POST"])
+def edit_well(facility_id, sample_id):
+    well = Well.query.get_or_404((facility_id, sample_id))
+    form = WellForm()
+    if form.validate_on_submit():
+        facility_id=facility_id
+        well_id=form.well_id.data
+        well_type=form.well_type.data
+        longitude=form.longitude.data
+        latitude=form.latitude.data
+        installation_date=form.installation_date.data
+        abandoned_date=form.abandoned_date.data
+        top_riser=form.top_riser.data
+        top_bent_seal=form.top_bent_seal.data
+        top_gravel_pack=form.top_gravel_pack.data
+        top_screen=form.top_screen.data
+        db.session.add(well)
+        db.session.commit()
+        flash("The well has been updated.")
+        return redirect(url_for(".wells"))
+    facility_id=facility_id
+    well_id=form.well_id.data
+    well_type=form.well_type.data
+    longitude=form.longitude.data
+    latitude=form.latitude.data
+    installation_date=form.installation_date.data
+    abandoned_date=form.abandoned_date.data
+    top_riser=form.top_riser.data
+    top_bent_seal=form.top_bent_seal.data
+    top_gravel_pack=form.top_gravel_pack.data
+    top_screen=form.top_screen.data
+    return render_template("edit_well.html", form=form)   
 
+    
 @main.route("/sample-results")
 def sample_results():
     sample_results = SampleResult.query.all()

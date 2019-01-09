@@ -14,8 +14,7 @@ from app.models import (
     Landfill,
     Impoundment,
     SampleResult,
-    Piezometer,
-    MonitoringWell,
+    Well,
 )
 
 app = create_app(os.getenv("FLASK_CONFIG") or "default")
@@ -35,8 +34,7 @@ def make_shell_context():
         StorageTank=StorageTank,
         AbovegroundStorageTank=AbovegroundStorageTank,
         UndergroundStorageTank=UndergroundStorageTank,
-        Piezometer=Piezometer,
-        MonitoringWell=MonitoringWell,
+        Well=Well,
         Boring=Boring,
         MediumCode=MediumCode,
     )

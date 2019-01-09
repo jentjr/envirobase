@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Envirobase - Wells{% endblock %}
+
+{% block page_content %}
+<table class="table">
+	<thead class="thead-dark">
+		<tr>
+		    <th scope="col">Facility</th>
+			<th scope="col">Well</th>
+			<th scope="col">Type</th>
+			<th scope="col">Longitude</th>
+			<th scope="col">Latitude</th>
+			<th scope="col">Created On</th>
+			<th scope="col">Last Updated</th>
+		</tr>
+	</thead>
+	<tbody>
+    {% for well in wells %}
+	<tr>
+	    <td>{{ well.facility.name }}</td>
+		<td>{{ well.well_id }}</td>
+		<td>{{ well.well_type }}</td>
+		<td>{{ well.longitude}}</td>
+		<td>{{ well.latitude }}</td>
+		<td>{{ well.created_on }}</td>
+		<td>{{ well.updated_on }}</td>
+	</tr>
+	{% endfor %}
+	</tbody>
+</table>
+{% endblock %}

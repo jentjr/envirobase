@@ -12,11 +12,11 @@
 		</tr>
 	</thead>
 	<tbody>
-    {% for location in sample_locations %}
+    {% for sample_id in sample_ids %}
 	<tr>
-        <td>{{ location.facility.name }}</td>
-		<td>{{ location.sample_id }}</td>
-		<td>{{ location.sample_type }}</td>
+        <td>{{ sample_id.facility.name }}</td>
+		<td>{{ sample_id.sample_id }}</td>
+		<td>{{ sample_id.sample_type }}</td>
 	</tr>
 	{% endfor %}
 	</tbody>

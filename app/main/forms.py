@@ -71,7 +71,26 @@ class WasteUnitForm(FlaskForm):
     submit = SubmitField("Submit")
 
 
-class MonitoringWellForm(FlaskForm):
+class WellForm(FlaskForm):
+    well_id = StringField("Well ID", validators=[DataRequired()])
+    well_type = SelectField(
+        "Type",
+        choices=[
+            ("piezometer", "Piezometer"),
+            ("monitoring", "Monitoring"),
+            ("supply", "Supply"),
+        ],
+    )
+    longitude = StringField(
+        "Longitude",
+        validators=[Optional(), Length(max=10)],
+        filters=[lambda x: x or None],
+    )
+    latitude = StringField(
+        "Latitude",
+        validators=[Optional(), Length(max=10)],
+        filters=[lambda x: x or None],
+    )
     installation_date = DateField(
         "Date of Installation", validators=[Optional()], filters=[lambda x: x or None]
     )

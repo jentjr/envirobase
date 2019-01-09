@@ -390,7 +390,7 @@ class SampleParameter(db.Model, BaseEntity):
 
 class SampleId(db.Model, BaseEntity):
     __tablename__ = "sample_id"
-    __table_args__=(db.UniqueConstraint("sample_id", "facility_id"),)
+    __table_args__ = (db.UniqueConstraint("sample_id", "facility_id"),)
 
     sample_id = db.Column(db.Integer, primary_key=True)
     facility_id = db.Column(db.Integer, db.ForeignKey("facility.facility_id"))
@@ -401,7 +401,7 @@ class SampleId(db.Model, BaseEntity):
     geometry = db.Column(Geometry(geometry_type="POINT", srid=4326))
     sample_type = db.Column(db.String(24))
 
-    facility = db.relationship("Facility", back_populates="sample_id")
+    facility = db.relationship("Facility")
 
     __mapper_args__ = {
         "polymorphic_identity": "sample_id",
@@ -430,21 +430,21 @@ class SampleId(db.Model, BaseEntity):
         return SampleId(sample_id=sample_id, sample_type=sample_type)
 
 
-class Boring(SampleId, BaseEntity):
+class Boring(db.Model, BaseEntity):
     __tablename__ = "boring"
-    __mapper_args__ = {"polymorphic_identity": "boring"}
 
-    boring_id = db.Column(db.Integer, primary_key=True)
+    boring_id = db.Column(db.Text, primary_key=True)
     start_date = db.Column(db.Date)
     end_date = db.Column(db.Date)
 
 
-class MonitoringWell(SampleId, BaseEntity):
-    __tablename__ = "monitoring_well"
+class Well(SampleId, BaseEntity):
+    __tablename__ = "well"
     __mapper_args__ = {"polymorphic_identity": "monitoring_well"}
 
-    well_id = db.Column(db.Text, primary_key=True)
-    boring_id = db.Column(db.Integer, db.ForeignKey("boring.boring_id"))
+    well_id = db.Column(db.Text)
+    boring_id = db.Column(db.Text, db.ForeignKey("boring.boring_id"))
+    well_type = db.Column(db.String(10))
     installation_date = db.Column(db.Date)
     abandoned_date = db.Column(db.Date)
     top_riser = db.Column(db.Float)
@@ -464,51 +464,17 @@ class MonitoringWell(SampleId, BaseEntity):
     notes = db.Column(db.Text)
 
     boring = db.relationship("Boring")
-    
+
     def __repr__(self):
         return f"MonitoringWell('{self.well_id}')"
-    
+
     def to_json(self):
         json_monitoring_well = {
             "url": url_for("api.get_monitoring_well", well_id=self.well_id),
             "top_screen": self.top_screen,
             "bottom_screen": self.bottom_screen,
-            }
-        return json_monitoring_well    
-
-
-class Piezometer(SampleId, BaseEntity):
-    __tablename__ = "piezometer"
-    __mapper_args__ = {"polymorphic_identity": "piezometer"}
-
-    piezometer_id = db.Column(db.Text, primary_key=True)
-    boring_id = db.Column(db.Integer, db.ForeignKey("boring.boring_id"))
-    installation_date = db.Column(db.Date)
-    abandoned_date = db.Column(db.Date)
-    top_riser = db.Column(db.Float)
-    top_bent_seal = db.Column(db.Float)
-    top_gravel_pack = db.Column(db.Float)
-    bottom_pizeometer = db.Column(db.Float)
-    bottom_boring = db.Column(db.Float)
-    grout_seal_desc = db.Column(db.Text)
-    bent_seal_desc = db.Column(db.Text)
-    screen_type = db.Column(db.Text)
-    gravel_pack_desc = db.Column(db.Text)
-    riser_pipe_desc = db.Column(db.Text)
-    spacer_depths = db.Column(db.Text)
-    notes = db.Column(db.Text)
-
-    boring = db.relationship("Boring")
-
-    def __repr__(self):
-        return f"Piezometer('{self.piezometer_id}')"
-    
-    def to_json(self):
-        json_piezometer = {
-            "url": url_for("api.get_piezometer", piezometer_id=self.piezometer_id),
-            "bottom_piezometer": self.bottom_piezometer,
-            }
-        return json_piezometer  
+        }
+        return json_monitoring_well
 
 
 class SampleResult(db.Model, BaseEntity):
@@ -550,10 +516,10 @@ class SampleResult(db.Model, BaseEntity):
 
     def __repr__(self):
         return f"SampleResult('{self.result_id}')"
-    
+
     def to_json(self):
         json_sample_result = {
             "url": url_for("api.get_sample_result", result_id=self.result_id),
             "lab_id": self.lab_id,
-            }
-        return json_sample_result  
+        }
+        return json_sample_result
