@@ -210,11 +210,19 @@ def sample_ids():
     sample_ids = SampleId.query.all()
     return render_template("sample_ids.html", sample_ids=sample_ids)
 
+    
 @main.route("/wells")
 def wells():
     wells = Well.query.all()
-    return render_template("wells.html", wells=wells)   
+    return render_template("wells.html", wells=wells)
     
+ 
+@main.route("/facilities/<int:facility_id>/wells", methods=["GET"])
+def facility_wells(facility_id):
+    wells = Well.query.filter_by(facility_id=facility_id).all()
+    return render_template("wells.html", wells=wells)
+ 
+ 
 @main.route("/facilities/<int:facility_id>/add-well", methods=["GET", "POST"])
 def add_well(facility_id):
     form = WellForm()
