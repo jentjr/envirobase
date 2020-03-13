@@ -1,8 +1,6 @@
 help:
 	@echo "Usage:"
 	@echo "    make help       show this message"
-	@echo "    make setup      create virtual environment and install dependencies"
-	@echo "    make activate   enter virtual environment"
 	@echo "    make test       run the test suite"
 	@echo "    make black      format code using black"
 	@echo "    exit            leave virtual environment"
@@ -10,14 +8,7 @@ help:
 black:
 	black .
 
-setup:
-	pip install pipenv
-	pipenv install --dev --three
-
-activate:
-	pipenv shell -c
-
 test:
-	pipenv run python -m pytest tests
+	python -m pytest tests
 
 .PHONY: help activate test
